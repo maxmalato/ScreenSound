@@ -1,0 +1,45 @@
+﻿@inherits LayoutComponentBase
+
+@* Provedores do MudBlazor *@
+@* <MudThemeProvider>
+    <MudPopoverProvider>
+        <MudDialogProvider>
+            <MudSnackbarProvider>
+
+                <div class="page">
+                    <div class="sidebar">
+                        <NavMenu />
+                    </div>
+
+                    <main>
+                        <div class="top-row px-4">
+                            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+                        </div>
+
+                        <article class="content px-4">
+                            @Body
+                        </article>
+                    </main>
+                </div>
+
+            </MudSnackbarProvider>
+        </MudDialogProvider>
+    </MudPopoverProvider>
+</MudThemeProvider> *@
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Color="Color.Surface" Fixed="true" Elevation="2">
+        <MudImage Src="images/screensound-logo.png" Width="50" />
+    </MudAppBar>
+    <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu></NavMenu>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>

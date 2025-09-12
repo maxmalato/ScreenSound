@@ -23,7 +23,20 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "ScreenSoundWeb", policy =>
+    {
+        policy
+            .WithOrigins("https://localhost:7236", "http://localhost:7236")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors("ScreenSoundWeb");
 
 app.AddEndPointsArtistas();
 app.AddEndPointsMusicas();
