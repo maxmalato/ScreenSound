@@ -1,45 +1,25 @@
 ﻿@inherits LayoutComponentBase
 
-@* Provedores do MudBlazor *@
-@* <MudThemeProvider>
-    <MudPopoverProvider>
-        <MudDialogProvider>
-            <MudSnackbarProvider>
-
-                <div class="page">
-                    <div class="sidebar">
-                        <NavMenu />
-                    </div>
-
-                    <main>
-                        <div class="top-row px-4">
-                            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-                        </div>
-
-                        <article class="content px-4">
-                            @Body
-                        </article>
-                    </main>
-                </div>
-
-            </MudSnackbarProvider>
-        </MudDialogProvider>
-    </MudPopoverProvider>
-</MudThemeProvider> *@
-
-<MudThemeProvider />
+<MudThemeProvider IsDarkMode="true" Theme="currentTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
     <MudAppBar Color="Color.Surface" Fixed="true" Elevation="2">
-        <MudImage Src="images/screensound-logo.png" Width="50" />
+        <MudImage Src="images/logo-screensound.png" />
     </MudAppBar>
     <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu></NavMenu>
     </MudDrawer>
-    <MudMainContent>
+    <MudMainContent class="main-content px-4">
         @Body
     </MudMainContent>
 </MudLayout>
+
+@code {
+    private MudTheme currentTheme = new MudTheme()
+    {
+        PaletteDark = ScreendsoundPallete.CreatePallete
+    };
+}

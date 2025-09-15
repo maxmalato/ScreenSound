@@ -4,14 +4,16 @@
 
 <h3>Artistas</h3>
 
-@if(artistas is not null)
+@if (artistas is not null)
 {
-    <ul>
+    <MudGrid>
         @foreach (var artista in artistas)
         {
-            <li>@artista.Nome</li>
+            <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
+            <CardArtista Artista="artista" />
+            </MudItem>
         }
-    </ul>
+    </MudGrid>
 }
 else
 {
