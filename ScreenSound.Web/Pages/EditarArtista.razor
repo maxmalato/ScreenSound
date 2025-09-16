@@ -1,7 +1,67 @@
-﻿@page "/editar-artista"
+﻿@page "/editar-artista/{NomeArtista}"
 
-<h3>EditarArtista</h3>
+@inject ArtistaAPI artistaAPI
+@inject NavigationManager navigationManager
+
+<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
+
+    <MudText Class="mt-8" Typo="Typo.h4">Edição de Artista</MudText>
+
+    <MudForm>
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Nome do Artista"
+                      @bind-Value="nome"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      RequiredError="Campo obrigatório."
+                      Disabled="true" />
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Biografia do artista"
+                      @bind-Value="biografia"
+                      Variant="Variant.Outlined"
+                      Lines="4"
+                      Required="true"
+                      RequiredError="Campo obrigatório." 
+                      Disabled="true"/>
+
+        <div class="d-flex align-center justify-content-end gap-3 mt-4">
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/artistas">
+                Voltar
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" @onclick="Excluir">
+                Excluir
+            </MudButton>
+        </div>
+
+    </MudForm>
+</MudPaper>
 
 @code {
+    private string? nome;
+    private string? biografia;
 
+    [Parameter]
+    public string? NomeArtista { get; set; }
+
+    public ArtistaResponse? Artista { get; set; }
+
+    // Carrega os dados do artista ao inicializar o componente
+    protected override async Task OnInitializedAsync()
+    {
+        Artista = await artistaAPI.GetArtistaPorNomeAsync(NomeArtista!);
+
+        nome = Artista?.Nome;
+        biografia = Artista?.Bio;
+    }
+
+    // Exclui o artista e navega de volta para a lista de artistas
+    private async Task Excluir()
+    {
+        var request = new ArtistaRequest(nome!, biografia!);
+
+        await artistaAPI.DeleteArtistaAsync(Artista!.Id);
+
+        navigationManager.NavigateTo("/artistas");
+    }
 }
