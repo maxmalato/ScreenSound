@@ -2,12 +2,15 @@
 
 @inject ArtistaAPI artistaAPI
 
-<h3>Artistas</h3>
+<MudStack Class="my-4" Row="true" Justify="Justify.SpaceBetween">
+    <MudText Class="mb-4" Typo="Typo.h4">Artistas Cadastrados</MudText>
+    <MudPagination Count="@_totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
+</MudStack>
 
-@if (artistas is not null)
+@if (_artistasPorPagina is not null)
 {
     <MudGrid>
-        @foreach (var artista in artistas)
+        @foreach (var artista in _artistasPorPagina)
         {
             <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
             <CardArtista Artista="artista" />
@@ -21,10 +24,32 @@ else
 }
 
 @code {
-    private ICollection<ArtistaResponse>? artistas;
+    private ICollection<ArtistaResponse>? _artistas;
+    private int _tamanho = 8; // Quantidade de artitas que devem ser mostrados na página
+    private int _totalItens;
+    private int _totalPaginas;
+    private ICollection<ArtistaResponse>? _artistasPorPagina;
 
     protected override async Task OnInitializedAsync()
     {
-        artistas = await artistaAPI.GetArtistasAsync();
+        _artistas = await artistaAPI.GetArtistasAsync();
+
+        if (_artistas is not null)
+        {
+            _artistas = _artistas.OrderByDescending(a => a.Id).ToList();
+            _totalItens = _artistas.Count();
+            _totalPaginas = Convert.ToInt32(Math.Ceiling((_totalItens * 1.0) / _tamanho));
+            
+            this.PaginaMudou(1);
+        }
+    }
+
+    private void PaginaMudou(int numeroPagina)
+    {
+        var indice = numeroPagina - 1;
+        _artistasPorPagina = _artistas!
+            .Skip(_tamanho * indice)
+            .Take(_tamanho)
+            .ToList();
     }
 }

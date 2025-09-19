@@ -73,6 +73,7 @@ public static class ArtistasExtensions
     }
 
     private static ArtistaResponse EntityToResponse(Artista artista)
+    
     {
         return new ArtistaResponse(artista.Id, artista.Nome, artista.Bio, artista.FotoPerfil);
     }

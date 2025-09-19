@@ -1,67 +1,113 @@
 ﻿@page "/editar-artista/{NomeArtista}"
 
-@inject ArtistaAPI artistaAPI
-@inject NavigationManager navigationManager
+@inject ArtistaAPI ArtistaApi
+@inject NavigationManager NavigationManager
 
 <MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
-
     <MudText Class="mt-8" Typo="Typo.h4">Edição de Artista</MudText>
 
+    @if (Artista is not null)
+    {
     <MudForm>
-
         <MudTextField Class="mt-4" T="string" Placeholder="Nome do Artista"
-                      @bind-Value="nome"
+                      @bind-Value="_nome"
                       Variant="Variant.Outlined"
                       Required="true"
                       RequiredError="Campo obrigatório."
-                      Disabled="true" />
+                      Disabled="@(_isEditing)"
+                      />
 
         <MudTextField Class="mt-4" T="string" Placeholder="Biografia do artista"
-                      @bind-Value="biografia"
+                      @bind-Value="_biografia"
                       Variant="Variant.Outlined"
                       Lines="4"
                       Required="true"
-                      RequiredError="Campo obrigatório." 
-                      Disabled="true"/>
+                      RequiredError="Campo obrigatório."
+                      Disabled="@(_isEditing)"
+                      />
 
         <div class="d-flex align-center justify-content-end gap-3 mt-4">
             <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/artistas">
                 Voltar
             </MudButton>
+            
+            @if (!_isEditing)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="CancelarEdicao">
+                    Cancelar
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" @onclick="Salvar">
+                    Salvar
+                </MudButton>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="HabilitarEdicao">
+                    Editar
+                </MudButton>
 
-            <MudButton Variant="Variant.Filled" Color="Color.Warning" @onclick="Excluir">
-                Excluir
-            </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" @onclick="Excluir">
+                    Excluir
+                </MudButton>
+            }
         </div>
-
     </MudForm>
+    }
+    else
+    {
+        <MudText>Carregando artista...</MudText>       
+    }
 </MudPaper>
 
 @code {
-    private string? nome;
-    private string? biografia;
-
     [Parameter]
     public string? NomeArtista { get; set; }
-
     public ArtistaResponse? Artista { get; set; }
-
+    
+    private string? _nome;
+    private string? _biografia;
+    private bool _isEditing = true;
+    
     // Carrega os dados do artista ao inicializar o componente
     protected override async Task OnInitializedAsync()
     {
-        Artista = await artistaAPI.GetArtistaPorNomeAsync(NomeArtista!);
+        Artista = await ArtistaApi.GetArtistaPorNomeAsync(NomeArtista!);
 
-        nome = Artista?.Nome;
-        biografia = Artista?.Bio;
+        _nome = Artista!.Nome;
+        _biografia = Artista!.Bio;
     }
-
+    
+    // Alterar o nome dos botões quando o usuário clica em "Editar"
+    private void HabilitarEdicao()
+    {
+        _isEditing = false;
+    }
+    
+    // Cancela a edição e restaura os dados antigos
+    private void CancelarEdicao()
+    {
+        _isEditing = true;
+        _nome = Artista!.Nome;
+        _biografia = Artista!.Bio;
+    }
+    
+    // Edita e salva as alterações do artista
+    private async Task Salvar()
+    {
+        if (Artista is not null)
+        {
+            var requestEdit = new ArtistaRequestEdit(Artista!.Id, _nome!, _biografia!);
+            
+            await ArtistaApi.UpdateArtistaAsync(requestEdit);
+            
+            NavigationManager.NavigateTo("/artistas");
+        }
+    }
+    
     // Exclui o artista e navega de volta para a lista de artistas
     private async Task Excluir()
     {
-        var request = new ArtistaRequest(nome!, biografia!);
-
-        await artistaAPI.DeleteArtistaAsync(Artista!.Id);
-
-        navigationManager.NavigateTo("/artistas");
+        await ArtistaApi.DeleteArtistaAsync(Artista!.Id);
+        NavigationManager.NavigateTo("/artistas");
     }
 }
