@@ -34,9 +34,21 @@ public static class ArtistasExtensions
 
         });
 
-        app.MapPost("/Artistas", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequest artistaRequest) =>
+        app.MapPost("/Artistas", async ([FromServices] IHostEnvironment env ,[FromServices] DAL<Artista> dal, [FromBody] ArtistaRequest artistaRequest) =>
         {
-            var artista = new Artista(artistaRequest.nome, artistaRequest.bio);
+            var nome = artistaRequest.Nome.Trim();
+            var imagemArtista = DateTime.Now.ToString("dd-MM-yyyy") + "." + nome + ".jpeg";
+            var path = Path.Combine(env.ContentRootPath, "wwwroot", "FotosPerfil", imagemArtista);
+            
+            using MemoryStream ms = new(Convert.FromBase64String(artistaRequest.FotoPerfil!));
+            await using FileStream fs = new(path, FileMode.Create);
+
+            await ms.CopyToAsync(fs);
+            
+            var artista = new Artista(artistaRequest.Nome, artistaRequest.Bio)
+            {
+                FotoPerfil = $"/FotosPerfil/{imagemArtista}"
+            };
 
             dal.Adicionar(artista);
             return Results.Ok();
@@ -59,8 +71,8 @@ public static class ArtistasExtensions
             {
                 return Results.NotFound();
             }
-            artistaAAtualizar.Nome = artistaRequestEdit.nome;
-            artistaAAtualizar.Bio = artistaRequestEdit.bio;        
+            artistaAAtualizar.Nome = artistaRequestEdit.Nome;
+            artistaAAtualizar.Bio = artistaRequestEdit.Bio;        
             dal.Atualizar(artistaAAtualizar);
             return Results.Ok();
         });

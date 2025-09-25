@@ -38,6 +38,8 @@ var app = builder.Build();
 
 app.UseCors("ScreenSoundWeb");
 
+app.UseStaticFiles();
+
 app.AddEndPointsArtistas();
 app.AddEndPointsMusicas();
 app.AddEndPointGeneros();

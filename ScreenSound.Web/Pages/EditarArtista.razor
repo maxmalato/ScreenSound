@@ -66,6 +66,7 @@
     
     private string? _nome;
     private string? _biografia;
+    private string? _fotoPerfil;
     private bool _isEditing = true;
     
     // Carrega os dados do artista ao inicializar o componente
@@ -96,7 +97,7 @@
     {
         if (Artista is not null)
         {
-            var requestEdit = new ArtistaRequestEdit(Artista!.Id, _nome!, _biografia!);
+            var requestEdit = new ArtistaRequestEdit(Artista!.Id, _nome!, _biografia!, _fotoPerfil);
             
             await ArtistaApi.UpdateArtistaAsync(requestEdit);
             
