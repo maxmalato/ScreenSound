@@ -10,8 +10,8 @@ public static class ArtistasExtensions
 {
     public static void AddEndPointsArtistas(this WebApplication app)
     {
-
         #region Endpoint Artistas
+
         app.MapGet("/Artistas", ([FromServices] DAL<Artista> dal) =>
         {
             var listaDeArtistas = dal.Listar();
@@ -19,6 +19,7 @@ public static class ArtistasExtensions
             {
                 return Results.NotFound();
             }
+
             var listaDeArtistaResponse = EntityListToResponseList(listaDeArtistas);
             return Results.Ok(listaDeArtistaResponse);
         });
@@ -30,52 +31,58 @@ public static class ArtistasExtensions
             {
                 return Results.NotFound();
             }
+
             return Results.Ok(EntityToResponse(artista));
-
         });
 
-        app.MapPost("/Artistas", async ([FromServices] IHostEnvironment env ,[FromServices] DAL<Artista> dal, [FromBody] ArtistaRequest artistaRequest) =>
-        {
-            var nome = artistaRequest.Nome.Trim();
-            var imagemArtista = DateTime.Now.ToString("dd-MM-yyyy") + "." + nome + ".jpeg";
-            var path = Path.Combine(env.ContentRootPath, "wwwroot", "FotosPerfil", imagemArtista);
-            
-            using MemoryStream ms = new(Convert.FromBase64String(artistaRequest.FotoPerfil!));
-            await using FileStream fs = new(path, FileMode.Create);
-
-            await ms.CopyToAsync(fs);
-            
-            var artista = new Artista(artistaRequest.Nome, artistaRequest.Bio)
+        app.MapPost("/Artistas",
+            async ([FromServices] IHostEnvironment env, [FromServices] DAL<Artista> dal,
+                [FromBody] ArtistaRequest artistaRequest) =>
             {
-                FotoPerfil = $"/FotosPerfil/{imagemArtista}"
-            };
+                var nome = artistaRequest.Nome.Trim();
+                var imagemArtista = DateTime.Now.ToString("dd-MM-yyyy") + "." + nome + ".jpeg";
+                var path = Path.Combine(env.ContentRootPath, "wwwroot", "FotosPerfil", imagemArtista);
 
-            dal.Adicionar(artista);
-            return Results.Ok();
-        });
+                using MemoryStream ms = new(Convert.FromBase64String(artistaRequest.FotoPerfil!));
+                await using FileStream fs = new(path, FileMode.Create);
 
-        app.MapDelete("/Artistas/{id}", ([FromServices] DAL<Artista> dal, int id) => {
+                await ms.CopyToAsync(fs);
+
+                var artista = new Artista(artistaRequest.Nome, artistaRequest.Bio)
+                {
+                    FotoPerfil = $"/FotosPerfil/{imagemArtista}"
+                };
+
+                dal.Adicionar(artista);
+                return Results.Ok();
+            });
+
+        app.MapDelete("/Artistas/{id}", ([FromServices] DAL<Artista> dal, int id) =>
+        {
             var artista = dal.RecuperarPor(a => a.Id == id);
             if (artista is null)
             {
                 return Results.NotFound();
             }
+
             dal.Deletar(artista);
             return Results.NoContent();
-
         });
 
-        app.MapPut("/Artistas", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artistaRequestEdit) => {
+        app.MapPut("/Artistas", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artistaRequestEdit) =>
+        {
             var artistaAAtualizar = dal.RecuperarPor(a => a.Id == artistaRequestEdit.Id);
             if (artistaAAtualizar is null)
             {
                 return Results.NotFound();
             }
+
             artistaAAtualizar.Nome = artistaRequestEdit.Nome;
-            artistaAAtualizar.Bio = artistaRequestEdit.Bio;        
+            artistaAAtualizar.Bio = artistaRequestEdit.Bio;
             dal.Atualizar(artistaAAtualizar);
             return Results.Ok();
         });
+
         #endregion
     }
 
@@ -85,10 +92,8 @@ public static class ArtistasExtensions
     }
 
     private static ArtistaResponse EntityToResponse(Artista artista)
-    
+
     {
         return new ArtistaResponse(artista.Id, artista.Nome, artista.Bio, artista.FotoPerfil);
     }
-
-  
 }

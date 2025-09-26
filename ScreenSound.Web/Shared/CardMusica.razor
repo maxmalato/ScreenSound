@@ -1,0 +1,18 @@
+﻿<MudCard>
+    <MudCardMedia Image="images/cardArtista.png"></MudCardMedia>
+
+    <MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.h6">@Musica!.Nome</MudText>
+        </MudCardContent>
+    </MudCardHeader>
+
+    <MudCardContent>
+        <MudText Typo="Typo.body2">Artista/Banda:@Musica!.NomeArtista</MudText>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public MusicaResponse? Musica { get; set; }
+}
