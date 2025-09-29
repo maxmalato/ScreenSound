@@ -1,26 +1,26 @@
 ﻿@page "/cadastrar-musica"
 
-@inject ArtistaAPI ArtistaApi
-@inject GeneroAPI GeneroApi
+@inject ArtistaAPI artistaAPI
+@inject GeneroAPI generoAPI
 
 <MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
 
     <MudText Class="mt-8" Typo="Typo.h4">Cadastro de Música</MudText>
 
     <MudForm>
-        <MudTextField Class="mt-4" T="string" Placeholder="Nome da música/canção"
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Nome da música"
                       @bind-Value="_nome"
                       Variant="Variant.Outlined"
                       Required="true"
-                      RequiredError="Campo obrigatório."/>
+                      RequiredError="Campo obrigatório." />
 
-        <MudSelect Class="mt-4" T="ArtistaResponse" Label="Artistas"
-                   Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-            @if (_artistas is not null)
+        <MudSelect Class="mt-4" T="ArtistaResponse" Label="Artistas" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+            @if(_artistas is not null)
             {
-                @foreach (var item in _artistas)
+                @foreach(var artista in _artistas)
                 {
-                    <MudSelectItem Value="item"/>
+                    <MudSelectItem Value="artista">@artista.Nome</MudSelectItem>
                 }
             }
         </MudSelect>
@@ -30,15 +30,14 @@
                          Variant="Variant.Outlined"
                          Lines="1"
                          Required="true"
-                         RequiredError="Campo obrigatório."/>
+                         RequiredError="Campo obrigatório." />
 
-        <MudSelect Class="mt-4" T="string" Label="Gêneros"
-                   Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+        <MudSelect Class="mt-4" T="GeneroResponse" Label="Gêneros" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
             @if (_generos is not null)
             {
-                @foreach (var item in _generos)
+                @foreach (var genero in _generos)
                 {
-                    <MudSelectItem Value="item"/>
+                    <MudSelectItem Value="genero">@genero.Nome</MudSelectItem>
                 }
             }
         </MudSelect>
@@ -46,18 +45,19 @@
         <div class="d-flex align-center justify-space-between mt-4">
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Primary"
-                       Class="ml-auto"
-            >
+                       Class="ml-auto">
+            
                 Voltar
             </MudButton>
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
-                       Class="ml-3"
-            >
+                       Class="ml-3">
                 Cadastrar
             </MudButton>
         </div>
+
     </MudForm>
+
 </MudPaper>
 
 @code {
@@ -69,7 +69,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _artistas = await ArtistaApi.GetArtistasAsync();
-        _generos = await GeneroApi.GetGeneroAsync();
+        _artistas = await artistaAPI.GetArtistasAsync();
+        _generos = await generoAPI.GetGenerosAsync();
     }
 }
