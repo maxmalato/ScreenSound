@@ -16,7 +16,9 @@
 </MudCard>
 
 @code {
-    [Parameter] public ArtistaResponse? Artista { get; set; }
+    [Parameter] 
+    public ArtistaResponse? Artista { get; set; }
+    
     public string? Imagem { get; set; }
 
     protected override void OnInitialized()

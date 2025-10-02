@@ -8,8 +8,12 @@
     </MudCardHeader>
 
     <MudCardContent>
-        <MudText Typo="Typo.body2">Artista/Banda:@Musica!.NomeArtista</MudText>
+        <MudText Typo="Typo.body2">Artista: @Musica!.NomeArtista</MudText>
     </MudCardContent>
+
+    <MudCardActions>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@($"/editar-musica/{Musica!.Nome}")">Ver detalhes</MudButton>
+    </MudCardActions>
 </MudCard>
 
 @code {
