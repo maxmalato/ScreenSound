@@ -12,7 +12,12 @@
     @if (MusicaResponse is not null)
     {
         <MudForm>
-
+            @if(ArtistaDaMusica is not null)
+            {
+                <MudAlert Severity="Severity.Warning">
+                    <b>DEBUG:</b> Artista atualmente selecionado é <b>@ArtistaDaMusica.Nome</b> (ID: @ArtistaDaMusica.Id)
+                </MudAlert>
+            }
             <MudTextField Class="mt-4" T="string" Placeholder="Nome da música"
                           @bind-Value="_nome"
                           Variant="Variant.Outlined"
@@ -125,8 +130,6 @@
         {
             ArtistaDaMusica = _artistas.FirstOrDefault(a => a.Id == MusicaResponse.ArtistaId);
         }
-
-        // ArtistaDaMusica = new ArtistaResponse(MusicaResponse.ArtistaId, MusicaResponse.NomeArtista, "", "");
     }
 
     // Alterar o nome dos botões quando o usuário clica em "Editar"
@@ -160,9 +163,15 @@
 
     private async Task Salvar()
     {
+        if(ArtistaDaMusica is null)
+        {
+            Console.WriteLine("Nenhum artista selecionado.");
+            return;
+        }
+
         if (MusicaResponse is not null)
         {
-            var requestEdit = new MusicaRequestEdit(MusicaResponse!.Id, _nome!, ArtistaDaMusica!.Id, _anoLancamento);
+            var requestEdit = new MusicaRequestEdit(MusicaResponse!.Id, _nome!, ArtistaDaMusica.Id, _anoLancamento);
 
             await musicaAPI.UpdateMusicaAsync(requestEdit);
 
