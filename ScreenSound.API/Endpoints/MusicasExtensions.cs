@@ -110,9 +110,9 @@ public static class MusicasExtensions
     {
         if (musica.Artista is null)
         {
-            return new MusicaResponse(musica.Id, musica.Nome!, 0, "Artista não cadastrado");
+            return new MusicaResponse(musica.Id, musica.Nome, 0, "Artista não cadastrado", 0);
         }
 
-        return new MusicaResponse(musica.Id, musica.Nome!, musica.Artista!.Id, musica.Artista.Nome);
+        return new MusicaResponse(musica.Id, musica.Nome, musica.Artista.Id, musica.Artista.Nome, musica.AnoLancamento);
     }
 }

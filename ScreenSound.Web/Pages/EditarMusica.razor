@@ -12,12 +12,6 @@
     @if (MusicaResponse is not null)
     {
         <MudForm>
-            @if(ArtistaDaMusica is not null)
-            {
-                <MudAlert Severity="Severity.Warning">
-                    <b>DEBUG:</b> Artista atualmente selecionado é <b>@ArtistaDaMusica.Nome</b> (ID: @ArtistaDaMusica.Id)
-                </MudAlert>
-            }
             <MudTextField Class="mt-4" T="string" Placeholder="Nome da música"
                           @bind-Value="_nome"
                           Variant="Variant.Outlined"
