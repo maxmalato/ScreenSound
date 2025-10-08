@@ -11,11 +11,8 @@ public class ScreenSoundContext : DbContext
     public DbSet<Genero> Generos { get; set; }
 
     // Conexão local
-    //private string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ScreenSoundV0;Integrated Security=True;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
-
-    // Conexão no Azure
-    private string connectionStringAzure = "Server=tcp:screensoundsrv.database.windows.net,1433;Initial Catalog=ScreenSoundV0;Persist Security Info=False;User ID=maxmalato;Password={your_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-
+    private string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ScreenSoundV0;Integrated Security=True;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+    
     public ScreenSoundContext(DbContextOptions options) : base(options)
     {
     }
@@ -41,5 +38,7 @@ public class ScreenSoundContext : DbContext
         modelBuilder.Entity<Musica>()
             .HasMany(c => c.Generos)
             .WithMany(c => c.Musicas);
+        
+        base.OnModelCreating(modelBuilder);
     }
 }
