@@ -1,8 +1,15 @@
 ﻿using ScreenSound.Banco;
 using ScreenSound.Menus;
 using ScreenSound.Modelos;
+using Microsoft.EntityFrameworkCore;
 
-var context = new ScreenSoundContext();
+//var context = new ScreenSoundContext();
+// Adicione os usings necessários
+
+// Substitua a linha de criação do contexto por esta:
+var optionsBuilder = new DbContextOptionsBuilder<ScreenSoundContext>();
+optionsBuilder.UseSqlServer("sua-string-de-conexao-aqui");
+var context = new ScreenSoundContext(optionsBuilder.Options);
 var artistaDAL = new DAL<Artista>(context);
 
 Dictionary<int, Menu> opcoes = new();
@@ -45,7 +52,7 @@ void ExibirOpcoesDoMenu()
         Menu menuASerExibido = opcoes[opcaoEscolhidaNumerica];
         menuASerExibido.Executar(artistaDAL);
         if (opcaoEscolhidaNumerica > 0) ExibirOpcoesDoMenu();
-    } 
+    }
     else
     {
         Console.WriteLine("Opção inválida");
