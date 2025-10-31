@@ -46,6 +46,6 @@ public class ArtistaAPI
     // Editar artista
     public async Task UpdateArtistaAsync(ArtistaRequestEdit artista)
     {
-        await _httpClient.PutAsJsonAsync("artistas/", artista);       
+        await _httpClient.PutAsJsonAsync("artistas/", artista);
     }
 }

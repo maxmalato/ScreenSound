@@ -32,20 +32,18 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: "ScreenSoundWeb", policy =>
-    {
-        policy
-            .WithOrigins("https://localhost:7236", "http://localhost:7236")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
+builder.Services.AddCors(
+    options => options.AddPolicy(
+        "wasm",
+        policy => policy.WithOrigins([builder.Configuration["BackendUrl"] ?? "https://localhost:7089", builder.Configuration["FrontendUrl"] ?? "https://localhost:7236"])
+        .AllowAnyMethod()
+        .SetIsOriginAllowed(pol => true)
+        .AllowAnyHeader()
+        .AllowCredentials()));
 
 var app = builder.Build();
 
-app.UseCors("ScreenSoundWeb");
+app.UseCors("wasm");
 
 app.UseStaticFiles();
 
