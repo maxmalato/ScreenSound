@@ -6,20 +6,52 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Color="Color.Surface" Fixed="true" Elevation="2">
-        <MudImage Src="images/logo-screensound.png" />
-    </MudAppBar>
-    <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu></NavMenu>
-    </MudDrawer>
-    <MudMainContent class="main-content pa-10">
-        @Body
-    </MudMainContent>
+    <MudLayout>
+        <!-- Barra superior -->
+        <MudAppBar Elevation="1" Color="Color.Surface">
+            <!-- Botão de menu (visível apenas em telas pequenas) -->
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Primary"
+                           Edge="Edge.Start"
+                           Class="mud-hidden-md-up"
+                           OnClick="@ToggleDrawer" />
+
+            <!-- Logo -->
+            <MudImage Src="images/logo-screensound.png"
+                      Alt="Logo ScreenSound"
+                      Width="150"
+                      Class="ml-2" />
+
+            <MudSpacer />
+
+            <!-- Espaço para adicionar perfil, notificações, etc -->
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Primary" />
+        </MudAppBar>
+
+        <!-- Menu lateral -->
+        <MudDrawer @bind-Open="_drawerOpen"
+                   Elevation="2"
+                   ClipMode="DrawerClipMode.Always"
+                   Variant="@_drawerVariant"
+                   Class="pa-2">
+            <NavMenu />
+        </MudDrawer>
+
+        <!-- Conteúdo principal -->
+        <MudMainContent Class="p-5">
+            @Body
+        </MudMainContent>
+    </MudLayout>
 </MudLayout>
 
 @code {
+    private bool _drawerOpen = true;
+    private DrawerVariant _drawerVariant = DrawerVariant.Responsive;
+
     private MudTheme currentTheme = new MudTheme()
     {
         PaletteDark = ScreendsoundPallete.CreatePallete
     };
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 }

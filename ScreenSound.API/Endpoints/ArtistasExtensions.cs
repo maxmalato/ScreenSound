@@ -10,11 +10,11 @@ public static class ArtistasExtensions
 {
     public static void AddEndPointsArtistas(this WebApplication app)
     {
-        var groupBuilder = app.MapGroup("artistas").RequireAuthorization().WithTags("Artistas");
+        var groupBuilderArtistas = app.MapGroup("artistas").RequireAuthorization().WithTags("Artistas");
 
         #region Endpoint Artistas
 
-        groupBuilder.MapGet("", ([FromServices] DAL<Artista> dal) =>
+        groupBuilderArtistas.MapGet("", ([FromServices] DAL<Artista> dal) =>
         {
             var listaDeArtistas = dal.Listar();
             if (listaDeArtistas is null)
@@ -26,7 +26,7 @@ public static class ArtistasExtensions
             return Results.Ok(listaDeArtistaResponse);
         });
 
-        groupBuilder.MapGet("{nome}", ([FromServices] DAL<Artista> dal, string nome) =>
+        groupBuilderArtistas.MapGet("{nome}", ([FromServices] DAL<Artista> dal, string nome) =>
         {
             var artista = dal.RecuperarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (artista is null)
@@ -37,7 +37,7 @@ public static class ArtistasExtensions
             return Results.Ok(EntityToResponse(artista));
         });
 
-        groupBuilder.MapPost("",
+        groupBuilderArtistas.MapPost("",
             async ([FromServices] IHostEnvironment env, [FromServices] DAL<Artista> dal,
                 [FromBody] ArtistaRequest artistaRequest) =>
             {
@@ -59,7 +59,7 @@ public static class ArtistasExtensions
                 return Results.Ok();
             });
 
-        groupBuilder.MapDelete("{id}", ([FromServices] DAL<Artista> dal, int id) =>
+        groupBuilderArtistas.MapDelete("{id}", ([FromServices] DAL<Artista> dal, int id) =>
         {
             var artista = dal.RecuperarPor(a => a.Id == id);
             if (artista is null)
@@ -71,7 +71,7 @@ public static class ArtistasExtensions
             return Results.NoContent();
         });
 
-        groupBuilder.MapPut("", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artistaRequestEdit) =>
+        groupBuilderArtistas.MapPut("", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artistaRequestEdit) =>
         {
             var artistaAAtualizar = dal.RecuperarPor(a => a.Id == artistaRequestEdit.Id);
             if (artistaAAtualizar is null)

@@ -1,4 +1,5 @@
-﻿using ScreenSound.Web.Response;
+﻿using ScreenSound.Web.Pages;
+using ScreenSound.Web.Response;
 using System.Net.Http.Json;
 
 namespace ScreenSound.Web.Services;
@@ -11,6 +12,7 @@ public class AuthAPI(IHttpClientFactory factory)
     public async Task<AuthResponse> LoginAsync(string email, string senha)
     {
         var cookiesUrl = "auth/login?useCookies=true&useSessionCookies=true";
+        //var cookiesUrl = "auth/login?useCookies=true";
 
         var response = await _httpClient.PostAsJsonAsync(cookiesUrl, new
         {
