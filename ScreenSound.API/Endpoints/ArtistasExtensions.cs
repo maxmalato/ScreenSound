@@ -10,7 +10,10 @@ public static class ArtistasExtensions
 {
     public static void AddEndPointsArtistas(this WebApplication app)
     {
-        var groupBuilderArtistas = app.MapGroup("artistas").RequireAuthorization().WithTags("Artistas");
+        var groupBuilderArtistas = app
+            .MapGroup("artistas")
+            .RequireAuthorization()
+            .WithTags("Artistas");
 
         #region Endpoint Artistas
 

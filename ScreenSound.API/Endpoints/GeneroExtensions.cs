@@ -10,7 +10,10 @@ public static class GeneroExtensions
 {
     public static void AddEndPointGeneros(this WebApplication app)
     {
-        var groupBuilderGenero = app.MapGroup("generos").RequireAuthorization().WithTags("Gêneros");
+        var groupBuilderGenero = app
+            .MapGroup("generos")
+            .RequireAuthorization()
+            .WithTags("Gêneros");
 
         groupBuilderGenero.MapPost("/Generos", ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequest generoReq) =>
         {

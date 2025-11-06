@@ -13,7 +13,7 @@
         @foreach (var artista in _artistasPorPagina)
         {
             <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
-            <CardArtista Artista="artista" />
+                <CardArtista Artista="artista" />
             </MudItem>
         }
     </MudGrid>
@@ -39,7 +39,7 @@ else
             _artistas = _artistas.OrderByDescending(a => a.Id).ToList();
             _totalItens = _artistas.Count();
             _totalPaginas = Convert.ToInt32(Math.Ceiling((_totalItens * 1.0) / _tamanho));
-            
+
             this.PaginaMudou(1);
         }
     }

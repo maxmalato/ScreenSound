@@ -1,4 +1,4 @@
-﻿<MudCard>
+﻿<MudCard Class="mud-height-full">
     <MudCardMedia Image=@Imagem></MudCardMedia>
     <MudCardHeader>
         <CardHeaderContent>
@@ -6,7 +6,9 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudText Typo="Typo.body2">@Artista!.Bio</MudText>
+        <MudText Typo="Typo.body2">
+            @Artista!.Bio
+        </MudText>
     </MudCardContent>
     <MudCardActions>
         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href=@($"/editar-artista/{Artista!.Nome}")>

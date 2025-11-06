@@ -11,7 +11,10 @@ public static class MusicasExtensions
 {
     public static void AddEndPointsMusicas(this WebApplication app)
     {
-        var groupBuilderMusicas = app.MapGroup("musicas").RequireAuthorization().WithTags("Músicas");
+        var groupBuilderMusicas = app
+            .MapGroup("musicas")
+            .RequireAuthorization()
+            .WithTags("Músicas");
 
         #region Endpoint Músicas
 
