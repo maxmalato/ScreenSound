@@ -55,7 +55,7 @@ app.AddEndPointGeneros();
 
 // Adicionar uma camada de autorização
 app.MapGroup("auth").MapIdentityApi<PessoaComAcesso>()
-    .WithTags("Autorização");
+    .WithTags("_Autorização");
 
 app.UseSwagger();
 app.UseSwaggerUI();

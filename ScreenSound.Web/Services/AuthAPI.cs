@@ -1,12 +1,36 @@
-﻿using ScreenSound.Web.Pages;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using ScreenSound.Web.Response;
 using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace ScreenSound.Web.Services;
 
-public class AuthAPI(IHttpClientFactory factory)
+public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 {
     private readonly HttpClient _httpClient = factory.CreateClient("API");
+
+    // Método que pega o estado de autenticação
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    {
+        var pessoa = new ClaimsPrincipal(); // Estado anônimo por padrão (não autenticado)
+        var response = await _httpClient.GetAsync("auth/manage/info");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var info = await response.Content.ReadFromJsonAsync<InfoPessoaResponse>();
+            Claim[] dados =
+            [
+                new Claim(ClaimTypes.Name, info.Email),
+                new Claim(ClaimTypes.Email, info.Email),
+            ];
+
+            var identity = new ClaimsIdentity(dados, "Cookies");
+
+            pessoa = new ClaimsPrincipal(identity);
+        }
+
+        return new AuthenticationState(pessoa);
+    }
 
     // Criar um método para realizar a autenticação
     public async Task<AuthResponse> LoginAsync(string email, string senha)
@@ -22,6 +46,8 @@ public class AuthAPI(IHttpClientFactory factory)
 
         if (response.IsSuccessStatusCode)
         {
+            // Propagar o estado de autenticação
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             return new AuthResponse { Sucesso = true };
         }
 
