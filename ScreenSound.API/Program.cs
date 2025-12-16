@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScreenSound.API.Endpoints;
 using ScreenSound.Banco;
@@ -56,6 +58,14 @@ app.AddEndPointGeneros();
 // Adicionar uma camada de autorização
 app.MapGroup("auth").MapIdentityApi<PessoaComAcesso>()
     .WithTags("_Autorização");
+
+app.MapPost("auth/logout", async ([FromServices] SignInManager<PessoaComAcesso> signInManager) =>
+{
+    // Apagar o cookie de autenticação assim que o usuário fizer um logout
+    await signInManager.SignOutAsync();
+
+    return Results.Ok();
+}).RequireAuthorization().WithTags("_Autorização");
 
 app.UseSwagger();
 app.UseSwaggerUI();

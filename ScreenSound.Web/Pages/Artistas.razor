@@ -1,6 +1,8 @@
 ﻿@page "/artistas"
+@using Microsoft.AspNetCore.Authorization
 
 @inject ArtistaAPI artistaAPI
+@inject NavigationManager navigationManager
 
 <MudStack Class="my-4" Row="true" Justify="Justify.SpaceBetween">
     <MudText Class="mb-4" Typo="Typo.h4">Artistas Cadastrados</MudText>
