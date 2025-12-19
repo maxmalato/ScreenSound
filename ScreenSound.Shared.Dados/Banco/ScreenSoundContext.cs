@@ -12,7 +12,7 @@ public class ScreenSoundContext : IdentityDbContext<PessoaComAcesso, PerfilDeAce
     public DbSet<Musica> Musicas { get; set; }
     public DbSet<Genero> Generos { get; set; }
 
-    public ScreenSoundContext(DbContextOptions options) : base(options)
+    public ScreenSoundContext(DbContextOptions<ScreenSoundContext> options) : base(options)
     {
     }
 

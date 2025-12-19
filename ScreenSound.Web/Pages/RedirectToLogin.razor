@@ -1,0 +1,15 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@* // Este arquivo é um componente que fazer o redirecionamento para usuários não cadastros serem redirecionados para a página de login *@
+
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Pega a URL atual para retornar após o login
+        // EscapeDataString é usado para garantir que a URL seja codificada corretamente
+        NavigationManager.NavigateToLogin($"/login?ReturnUrl={Uri.EscapeDataString(NavigationManager.Uri)}");
+    }
+
+}
