@@ -18,18 +18,18 @@ public static class MusicasExtensions
 
         #region Endpoint Músicas
 
-        groupBuilderMusicas.MapGet("/Musicas", ([FromServices] DAL<Musica> dal) =>
+        groupBuilderMusicas.MapGet("", ([FromServices] DAL<Musica> dal) =>
         {
-            var musicaList = dal.Listar();
-            if (musicaList is null)
+            var listaDeMusicas = dal.Listar();
+            if (listaDeMusicas is null)
             {
                 return Results.NotFound();
             }
-            var musicaListResponse = EntityListToResponseList(musicaList);
-            return Results.Ok(musicaListResponse);
+            var listaDeMusicaResponse = EntityListToResponseList(listaDeMusicas);
+            return Results.Ok(listaDeMusicaResponse);
         });
 
-        groupBuilderMusicas.MapGet("/Musicas/{nome}", ([FromServices] DAL<Musica> dal, string nome) =>
+        groupBuilderMusicas.MapGet("{nome}", ([FromServices] DAL<Musica> dal, string nome) =>
         {
             var musica = dal.RecuperarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (musica is null)
@@ -39,9 +39,10 @@ public static class MusicasExtensions
             return Results.Ok(EntityToResponse(musica));
         });
 
-        groupBuilderMusicas.MapPost("/Musicas", ([FromServices] DAL<Musica> dal, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaRequest musicaRequest) =>
+        groupBuilderMusicas.MapPost("", ([FromServices] DAL<Musica> dal, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaRequest musicaRequest) =>
         {
-            var musica = new Musica(musicaRequest.Nome)
+            var nomeMusica = musicaRequest.Nome.Trim();
+            var musica = new Musica(nomeMusica)
             {
                 ArtistaId = musicaRequest.ArtistaId,
                 AnoLancamento = musicaRequest.AnoLancamento,
@@ -52,7 +53,7 @@ public static class MusicasExtensions
             return Results.Ok();
         });
 
-        groupBuilderMusicas.MapDelete("/Musicas/{id}", ([FromServices] DAL<Musica> dal, int id) =>
+        groupBuilderMusicas.MapDelete("{id}", ([FromServices] DAL<Musica> dal, int id) =>
         {
             var musica = dal.RecuperarPor(a => a.Id == id);
             if (musica is null)
@@ -63,7 +64,7 @@ public static class MusicasExtensions
             return Results.NoContent();
         });
 
-        groupBuilderMusicas.MapPut("/Musicas", ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequestEdit musicaRequestEdit) =>
+        groupBuilderMusicas.MapPut("", ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequestEdit musicaRequestEdit) =>
         {
             var musicaAAtualizar = dal.RecuperarPor(a => a.Id == musicaRequestEdit.Id);
             if (musicaAAtualizar is null)
