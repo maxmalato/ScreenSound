@@ -15,17 +15,21 @@ public static class GeneroExtensions
             .RequireAuthorization()
             .WithTags("Gêneros");
 
-        groupBuilderGenero.MapPost("/Generos", ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequest generoReq) =>
+        // Listar todos os gêneros
+        groupBuilderGenero.MapGet("", ([FromServices] DAL<Genero> dal) =>
         {
-            dal.Adicionar(RequestToEntity(generoReq));
+            var listaDeGeneros = dal.Listar();
+
+            if (!listaDeGeneros.Any())
+            {
+                return Results.NoContent();
+            }
+
+            return Results.Ok(EntityListToResponseList(listaDeGeneros));
         });
 
-        groupBuilderGenero.MapGet("/Generos", ([FromServices] DAL<Genero> dal) =>
-        {
-            return EntityListToResponseList(dal.Listar());
-        });
-
-        groupBuilderGenero.MapGet("/Generos/{nome}", ([FromServices] DAL<Genero> dal, string nome) =>
+        // Listar gênero por nome
+        groupBuilderGenero.MapGet("{nome}", ([FromServices] DAL<Genero> dal, string nome) =>
         {
             var genero = dal.RecuperarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (genero is not null)
@@ -36,6 +40,13 @@ public static class GeneroExtensions
             return Results.NotFound("Gênero não encontrado.");
         });
 
+        // Adicionar novo gênero
+        groupBuilderGenero.MapPost("", ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequest generoReq) =>
+        {
+            dal.Adicionar(RequestToEntity(generoReq));
+        });
+
+        // Excluir gênero por id
         groupBuilderGenero.MapDelete("/Generos/{id}", ([FromServices] DAL<Genero> dal, int id) =>
         {
             var genero = dal.RecuperarPor(a => a.Id == id);
