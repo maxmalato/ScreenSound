@@ -40,8 +40,6 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
     public async Task<AuthResponse> LoginAsync(string email, string senha)
     {
         var cookiesUrl = "auth/login?useCookies=true&useSessionCookies=true";
-        //var cookiesUrl = "auth/login?useCookies=true";
-
         var response = await _httpClient.PostAsJsonAsync(cookiesUrl, new
         {
             email,
@@ -50,12 +48,23 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 
         if (response.IsSuccessStatusCode)
         {
-            // Propagar o estado de autenticação
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            var claims = new[] { new Claim(ClaimTypes.Name, email), new Claim(ClaimTypes.Email, email) };
+            var identity = new ClaimsIdentity(claims, "Cookies");
+            var user = new ClaimsPrincipal(identity);
+
+            var authState = Task.FromResult(new AuthenticationState(user));
+
+            NotifyAuthenticationStateChanged(authState);
+
             return new AuthResponse { Sucesso = true };
         }
 
         return new AuthResponse { Sucesso = false, Erros = ["E-mail e/ou Senha inválido"] };
+    }
+
+    public void NotifyAuthState()
+    {
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
     // Criar um método para realizar o logout
