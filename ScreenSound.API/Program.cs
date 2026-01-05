@@ -54,10 +54,11 @@ app.UseAuthorization();
 app.AddEndPointsArtistas();
 app.AddEndPointsMusicas();
 app.AddEndPointGeneros();
+app.AddEnpointAuth();
 
 // Adicionar uma camada de autorização
-app.MapGroup("auth").MapIdentityApi<PessoaComAcesso>()
-    .WithTags("_Autorização");
+//app.MapGroup("auth").MapIdentityApi<PessoaComAcesso>()
+//    .WithTags("_Autorização");
 
 app.MapPost("auth/logout", async ([FromServices] SignInManager<PessoaComAcesso> signInManager) =>
 {

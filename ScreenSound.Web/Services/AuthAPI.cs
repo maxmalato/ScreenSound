@@ -62,6 +62,44 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
         return new AuthResponse { Sucesso = false, Erros = ["E-mail e/ou Senha inválido"] };
     }
 
+    public async Task<AuthResponse> RegisterAsync(string email, string senha)
+    {
+        var response = await _httpClient.PostAsJsonAsync("auth/register", new
+        {
+            email,
+            password = senha,
+        });
+
+        if (response.IsSuccessStatusCode)
+        {
+            return new AuthResponse { Sucesso = true };
+        }
+
+        var errosValidation = await response.Content.ReadFromJsonAsync<ValidationProblemResponse>();
+
+        // Mapear os erros de validação
+        var listaErros = new List<string>();
+
+        if (errosValidation?.Errors != null)
+        {
+            foreach (var erro in errosValidation.Errors)
+            {
+                listaErros.AddRange(erro.Value);
+            }
+        }
+        else
+        {
+            listaErros.Add("Não foi possível realizar o cadastro.");
+        }
+
+        return new AuthResponse { Sucesso = false, Erros = listaErros.ToArray() };
+    }
+
+    private class ValidationProblemResponse
+    {
+        public Dictionary<string, string[]> Errors { get; set; } = new();
+    }
+
     public void NotifyAuthState()
     {
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());

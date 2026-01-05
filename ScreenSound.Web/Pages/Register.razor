@@ -1,0 +1,54 @@
+﻿@page "/registrar"
+
+@inject AuthAPI AuthAPI
+@inject NavigationManager NavigationManager
+@inject ISnackbar ISnackbar
+
+@attribute [AllowAnonymous]
+
+<MudPaper Class="px-8 pt-2 pb-4 mx-16 my-8" Justify="Justify.Center">
+    <MudText Typo="Typo.h4" Class="mb-4">Criar nova conta</MudText>
+    <MudForm>
+        <MudTextField T="string" Label="E-mail" @bind-Value="email"
+                      Variant="Variant.Outlined" Class="my-4"
+                      Required="true" RequiredError="E-mail é obrigatório!" />
+
+        <MudTextField T="string" Label="Senha" @bind-Value="senha"
+                      InputType="InputType.Password"
+                      Variant="Variant.Outlined" Class="my-4"
+                      Required="true" RequiredError="Senha é obrigatória!" />
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-6"
+                   @onclick="RealizarCadastro" StartIcon="@Icons.Material.Filled.PersonAdd">
+            Cadastrar
+        </MudButton>
+
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" href="/login">
+            Já tenho uma conta
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private string? email;
+    private string? senha;
+
+    private async Task RealizarCadastro()
+    {
+        var response = await AuthAPI.RegisterAsync(email!, senha!);
+
+        if (response.Sucesso)
+        {
+            ISnackbar.Add("Cadastro realizado com sucesso!", Severity.Success);
+            NavigationManager.NavigateTo("/login");
+        } else
+        {
+            foreach(var erro in response.Erros)
+            {
+                ISnackbar.Add(erro, Severity.Error);
+            }
+        }
+    }
+
+
+}
