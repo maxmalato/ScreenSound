@@ -46,8 +46,26 @@ public static class GeneroExtensions
             dal.Adicionar(RequestToEntity(generoReq));
         });
 
+        // Atualizar gênero por id
+        groupBuilderGenero.MapPut("", ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequestEdit generoRequestEdit) =>
+        {
+            var generoAAtualizar = dal.RecuperarPor(a => a.Id == generoRequestEdit.Id);
+            
+            if (generoAAtualizar is null)
+            {
+                return Results.NotFound("Gênero para atualização não encontrado.");
+            }
+
+            generoAAtualizar.Nome = generoRequestEdit.Nome;
+            generoAAtualizar.Descricao = generoRequestEdit.Descricao;
+
+            dal.Atualizar(generoAAtualizar);
+            
+            return Results.Ok();
+        });
+
         // Excluir gênero por id
-        groupBuilderGenero.MapDelete("/Generos/{id}", ([FromServices] DAL<Genero> dal, int id) =>
+        groupBuilderGenero.MapDelete("{id}", ([FromServices] DAL<Genero> dal, int id) =>
         {
             var genero = dal.RecuperarPor(a => a.Id == id);
             if (genero is null)
