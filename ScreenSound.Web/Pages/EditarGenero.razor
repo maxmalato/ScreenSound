@@ -1,0 +1,111 @@
+﻿@page "/editar-genero/{NomeGenero}"
+
+@inject GeneroAPI generoAPI
+@inject NavigationManager NavigationManager
+
+<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
+    <MudText Class="mt-8" Typo="Typo.h4">Edição de Gêneros</MudText>
+
+    @if (generoAPI is not null)
+    {
+        <MudForm>
+            <MudTextField Class="mt-4" T="string" Placeholder="Nome do gênero"
+                          @bind-Value="_nome"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="Campo obrigatório."
+                          Disabled="@(_isEditing)" />
+
+            <MudTextField Class="mt-4" T="string" Placeholder="Descrição do gênero"
+                          @bind-Value="_descricao"
+                          Variant="Variant.Outlined"
+                          Lines="4"
+                          Required="true"
+                          RequiredError="Campo obrigatório."
+                          Disabled="@(_isEditing)" />
+
+            <div class="d-flex align-center justify-content-end gap-3 mt-4">
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/generos">
+                    Voltar
+                </MudButton>
+
+                @if (!_isEditing)
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="CancelarEdicao">
+                        Cancelar
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" @onclick="Salvar">
+                        Salvar
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="HabilitarEdicao">
+                        Editar
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" @onclick="Excluir">
+                        Excluir
+                    </MudButton>
+                }
+            </div>
+        </MudForm>
+    }
+    else
+    {
+        <MudText>Carregando gênero...</MudText>
+    }
+</MudPaper>
+
+@code {
+    [Parameter]
+    public string? NomeGenero { get; set; }
+    public GeneroResponse? Genero { get; set; }
+
+    private string? _nome;
+    private string? _descricao;
+    private bool _isEditing = true;
+
+    // Carrega os dados de gênero ao inicializar o componente
+    protected override async Task OnInitializedAsync()
+    {
+        Genero = await generoAPI.GetGeneroPorNomeAsync(NomeGenero!);
+
+        _nome = Genero!.Nome;
+        _descricao = Genero!.Descricao;
+    }
+
+    // Alterar o nome dos botões quando o usuário clica em "Editar"
+    private void HabilitarEdicao()
+    {
+        _isEditing = false;
+    }
+
+    // Cancela a edição e restaura os dados antigos
+    private void CancelarEdicao()
+    {
+        _isEditing = true;
+        _nome = Genero!.Nome;
+        _descricao = Genero!.Descricao;
+    }
+
+    // Edita e salva as alterações do artista
+    private async Task Salvar()
+    {
+        if (Genero is not null)
+        {
+            var requestEdit = new GeneroRequestEdit(Genero!.Id, _nome!, _descricao!);
+
+            await generoAPI.UpdateGeneroAsync(requestEdit);
+
+            NavigationManager.NavigateTo("/generos");
+        }
+    }
+
+    // Exclui o artista e navega de volta para a lista de artistas
+    private async Task Excluir()
+    {
+        await generoAPI.DeleteGeneroAsync(Genero!.Id);
+        NavigationManager.NavigateTo("/generos");
+    }
+}
