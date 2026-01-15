@@ -17,12 +17,12 @@ builder.Services.AddDbContext<ScreenSoundContext>((options) =>
         .UseLazyLoadingProxies();
 });
 
-// Injetar mais um serviço
+// Injetar mais um serviÃ§o
 builder.Services
     .AddIdentityApiEndpoints<PessoaComAcesso>()
     .AddEntityFrameworkStores<ScreenSoundContext>();
 
-// Injetar autorização
+// Injetar autorizaï¿½ï¿½o
 builder.Services.AddAuthorization();
 
 builder.Services.AddTransient<DAL<Artista>>();
@@ -56,17 +56,17 @@ app.AddEndPointsMusicas();
 app.AddEndPointGeneros();
 app.AddEnpointAuth();
 
-// Adicionar uma camada de autorização
+// Adicionar uma camada de autorizaï¿½ï¿½o
 //app.MapGroup("auth").MapIdentityApi<PessoaComAcesso>()
-//    .WithTags("_Autorização");
+//    .WithTags("_Autorizaï¿½ï¿½o");
 
 app.MapPost("auth/logout", async ([FromServices] SignInManager<PessoaComAcesso> signInManager) =>
 {
-    // Apagar o cookie de autenticação assim que o usuário fizer um logout
+    // Apagar o cookie de autenticaï¿½ï¿½o assim que o usuï¿½rio fizer um logout
     await signInManager.SignOutAsync();
 
     return Results.Ok();
-}).RequireAuthorization().WithTags("_Autorização");
+}).RequireAuthorization().WithTags("_Autorizaï¿½ï¿½o");
 
 app.UseSwagger();
 app.UseSwaggerUI();

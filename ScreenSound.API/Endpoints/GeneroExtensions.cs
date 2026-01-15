@@ -19,13 +19,9 @@ public static class GeneroExtensions
         groupBuilderGenero.MapGet("", ([FromServices] DAL<Genero> dal) =>
         {
             var listaDeGeneros = dal.Listar();
+            var listaDeArtistasResponse =  EntityListToResponseList(listaDeGeneros);
 
-            if (!listaDeGeneros.Any())
-            {
-                return Results.NoContent();
-            }
-
-            return Results.Ok(EntityListToResponseList(listaDeGeneros));
+            return Results.Ok(listaDeArtistasResponse);
         });
 
         // Listar gênero por nome
