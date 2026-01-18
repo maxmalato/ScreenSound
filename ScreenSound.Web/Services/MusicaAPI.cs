@@ -24,6 +24,12 @@ public class MusicaAPI
     {
         return await _httpClient.GetFromJsonAsync<MusicaResponse>($"musicas/{nome}");
     }
+    
+    // Listar músicas por gênero
+    public async Task<ICollection<MusicaResponse?>> GetMusicasPorGeneroAsync(int generoId)
+    {
+        return await  _httpClient.GetFromJsonAsync<ICollection<MusicaResponse?>>($"musicas/por-genero/{generoId}");
+    }
 
     // Adicionar nova música
     public async Task AddMusicaAsync(MusicaRequest musica)

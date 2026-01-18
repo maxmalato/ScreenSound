@@ -19,7 +19,10 @@ public static class GeneroExtensions
         groupBuilderGenero.MapGet("", ([FromServices] DAL<Genero> dal) =>
         {
             var listaDeGeneros = dal.Listar();
-            var listaDeArtistasResponse =  EntityListToResponseList(listaDeGeneros);
+
+            var listaDeGenerosOrdenado = listaDeGeneros.OrderBy(a => a.Nome);
+            
+            var listaDeArtistasResponse =  EntityListToResponseList(listaDeGenerosOrdenado);
 
             return Results.Ok(listaDeArtistasResponse);
         });
@@ -27,13 +30,10 @@ public static class GeneroExtensions
         // Listar gênero por nome
         groupBuilderGenero.MapGet("{nome}", ([FromServices] DAL<Genero> dal, string nome) =>
         {
-            var genero = dal.RecuperarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
-            if (genero is not null)
-            {
-                var response = EntityToResponse(genero!);
-                return Results.Ok(response);
-            }
-            return Results.NotFound("Gênero não encontrado.");
+            var genero = dal.RecuperarPor(a => a.Nome!.ToUpper().Equals(nome.ToUpper()));
+            if (genero is null) return Results.NotFound("Gênero não encontrado.");
+            var response = EntityToResponse(genero);
+            return Results.Ok(response);
         });
 
         // Adicionar novo gênero

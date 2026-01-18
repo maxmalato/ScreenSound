@@ -1,7 +1,60 @@
 ﻿@page "/musicas-por-genero"
+@inject GeneroAPI generoAPI
+@inject MusicaAPI musicaAPI
 
-<h3>MusicasPorGenero</h3>
+<MudContainer Class="mt-8">
+    <MudText Typo="Typo.h4" Class="mb-4">Músicas por Gênero</MudText>
+
+    <MudPaper Class="pa-4 mb-8">
+        <MudSelect T="GeneroResponse" Label="Selecione um Gênero" 
+                   ValueChanged="OnGeneroChanged" Variant="Variant.Outlined" 
+                   AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+            @if (_generos is not null)
+            {
+                @foreach (var genero in _generos)
+                {
+                    <MudSelectItem Value="@genero">@genero.Nome</MudSelectItem>
+                }
+            }
+        </MudSelect>
+    </MudPaper>
+
+    @if (_musicasFiltradas is not null)
+    {
+        @if (_musicasFiltradas.Any())
+        {
+            <MudGrid>
+                @foreach (var musica in _musicasFiltradas)
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3">
+                        <CardMusica Musica="musica" />
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info">Nenhuma música encontrada para este gênero.</MudAlert>
+        }
+    }
+</MudContainer>
 
 @code {
+    private ICollection<GeneroResponse>? _generos;
+    private ICollection<MusicaResponse>? _musicasFiltradas;
 
+    protected override async Task OnInitializedAsync()
+    {
+        // Carrega a lista de gêneros para o Select
+        _generos = await generoAPI.GetGenerosAsync();
+    }
+
+    private async Task OnGeneroChanged(GeneroResponse genero)
+    {
+        if (genero is not null)
+        {
+            // Busca as músicas sempre que o gênero mudar no select
+            _musicasFiltradas = await musicaAPI.GetMusicasPorGeneroAsync(genero.Id);
+        }
+    }
 }

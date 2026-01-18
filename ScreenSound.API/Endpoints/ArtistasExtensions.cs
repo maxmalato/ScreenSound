@@ -20,12 +20,9 @@ public static class ArtistasExtensions
         groupBuilderArtistas.MapGet("", ([FromServices] DAL<Artista> dal) =>
         {
             var listaDeArtistas = dal.Listar();
-            if (listaDeArtistas is null)
-            {
-                return Results.NotFound();
-            }
-
-            var listaDeArtistaResponse = EntityListToResponseList(listaDeArtistas);
+            var listadeArtistasOrdenado = listaDeArtistas.OrderBy(a => a.Nome);
+            var listaDeArtistaResponse = EntityListToResponseList(listadeArtistasOrdenado);
+            
             return Results.Ok(listaDeArtistaResponse);
         });
 

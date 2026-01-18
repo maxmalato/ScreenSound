@@ -78,6 +78,15 @@ public static class MusicasExtensions
             dal.Atualizar(musicaAAtualizar);
             return Results.Ok();
         });
+        
+        // Listar músicas por gênero
+        groupBuilderMusicas.MapGet("por-genero/{generoId}", ([FromServices] DAL<Musica> dal, int generoId) =>
+        {
+            var listaMusicasPorGenero = dal.Listar(m => m.Generos.Any(g => g.Id == generoId));
+            var listaMusicasPorGeneroResponse = EntityListToResponseList(listaMusicasPorGenero);
+            
+            return Results.Ok(listaMusicasPorGeneroResponse);
+        });
 
         #endregion Endpoint Músicas
     }

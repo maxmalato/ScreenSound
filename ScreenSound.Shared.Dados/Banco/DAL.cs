@@ -1,4 +1,6 @@
-﻿namespace ScreenSound.Banco;
+﻿using System.Linq.Expressions;
+
+namespace ScreenSound.Banco;
 
 public class DAL<T> where T : class
 {
@@ -12,6 +14,11 @@ public class DAL<T> where T : class
     public IEnumerable<T> Listar()
     {
         return context.Set<T>().ToList();
+    }
+
+    public IEnumerable<T> Listar(Expression<Func<T, bool>> condicao)
+    {
+        return context.Set<T>().Where(condicao).ToList();
     }
 
     public void Adicionar(T objeto)

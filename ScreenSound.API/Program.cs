@@ -22,7 +22,7 @@ builder.Services
     .AddIdentityApiEndpoints<PessoaComAcesso>()
     .AddEntityFrameworkStores<ScreenSoundContext>();
 
-// Injetar autoriza��o
+// Injetar autorização
 builder.Services.AddAuthorization();
 
 builder.Services.AddTransient<DAL<Artista>>();
@@ -62,11 +62,11 @@ app.AddEnpointAuth();
 
 app.MapPost("auth/logout", async ([FromServices] SignInManager<PessoaComAcesso> signInManager) =>
 {
-    // Apagar o cookie de autentica��o assim que o usu�rio fizer um logout
+    // Apagar o cookie de autenticação assim que o usu�rio fizer um logout
     await signInManager.SignOutAsync();
 
     return Results.Ok();
-}).RequireAuthorization().WithTags("_Autoriza��o");
+}).RequireAuthorization().WithTags("_Autorização");
 
 app.UseSwagger();
 app.UseSwaggerUI();
