@@ -361,3 +361,28 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# === JetBrains Rider / IntelliJ specific ===
+# Ignora a pasta de configurações da IDE que contém caminhos locais de banco e workspace
+.idea/
+*.sln.iml
+*.csproj.iml
+*.sql
+
+# Ignora especificamente arquivos de conexão que variam entre Docker (Win) e Orbstack (Mac)
+.idea/**/dataSources.xml
+.idea/**/data_source_mapping.xml
+.idea/**/workspace.xml
+
+# === macOS specific ===
+# Arquivos ocultos que o macOS cria em todas as pastas
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# === Local Environment / Secrets ===
+# Se você usar arquivos de configuração locais para não subir senhas
+appsettings.Local.json
+.env
