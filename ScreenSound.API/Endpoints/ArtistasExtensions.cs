@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using ScreenSound.API.Requests;
 using ScreenSound.API.Response;
 using ScreenSound.Banco;
 using ScreenSound.Modelos;
+using ScreenSound.Shared.Dados.Modelos;
 
 namespace ScreenSound.API.Endpoints;
 
@@ -83,6 +85,44 @@ public static class ArtistasExtensions
             artistaAAtualizar.Bio = artistaRequestEdit.Bio;
             dal.Atualizar(artistaAAtualizar);
             return Results.Ok();
+        });
+        
+        // Avaliar um artista
+        groupBuilderArtistas.MapPost("avaliacao", (
+            HttpContext context,
+            [FromBody] AvaliacaoArtistaRequest avaliacaoArtistaRequest,
+            [FromServices] DAL<Artista> dalArtista,
+            [FromServices] DAL<PessoaComAcesso> dalPessoaComAcesso
+            ) =>
+        {
+            var artista = dalArtista.RecuperarPor(a => a.Id == avaliacaoArtistaRequest.ArtistaId);
+            if (artista is null)
+            {
+                return Results.NotFound();
+            }
+            
+            var email = context
+                            .User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value 
+                        ?? throw new InvalidOperationException("Pessoa não está cadastrada.");
+
+            var pessoa = dalPessoaComAcesso
+                .RecuperarPor(a => a.Email.Equals(email))
+                ?? throw new InvalidOperationException("Pessoa não cadastrada.");
+
+            var avaliacao = artista.Avaliacoes.FirstOrDefault(a => a.ArtistaId == artista.Id && a.PessoaId == pessoa.Id);
+
+            if (avaliacao is null)
+            {
+                artista.AdicionarNota(pessoa.Id, avaliacaoArtistaRequest.Nota);
+            }
+            else
+            {
+                avaliacao.Nota = avaliacaoArtistaRequest.Nota;
+            }
+
+            dalArtista.Atualizar(artista);
+
+            return Results.Created();
         });
 
         #endregion
