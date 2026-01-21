@@ -24,7 +24,7 @@ public static class ArtistasExtensions
             var listaDeArtistas = dal.Listar();
             var listadeArtistasOrdenado = listaDeArtistas.OrderBy(a => a.Nome);
             var listaDeArtistaResponse = EntityListToResponseList(listadeArtistasOrdenado);
-            
+
             return Results.Ok(listaDeArtistaResponse);
         });
 
@@ -73,43 +73,45 @@ public static class ArtistasExtensions
             return Results.NoContent();
         });
 
-        groupBuilderArtistas.MapPut("", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artistaRequestEdit) =>
-        {
-            var artistaAAtualizar = dal.RecuperarPor(a => a.Id == artistaRequestEdit.Id);
-            if (artistaAAtualizar is null)
+        groupBuilderArtistas.MapPut("",
+            ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artistaRequestEdit) =>
             {
-                return Results.NotFound();
-            }
+                var artistaAAtualizar = dal.RecuperarPor(a => a.Id == artistaRequestEdit.Id);
+                if (artistaAAtualizar is null)
+                {
+                    return Results.NotFound();
+                }
 
-            artistaAAtualizar.Nome = artistaRequestEdit.Nome;
-            artistaAAtualizar.Bio = artistaRequestEdit.Bio;
-            dal.Atualizar(artistaAAtualizar);
-            return Results.Ok();
-        });
-        
+                artistaAAtualizar.Nome = artistaRequestEdit.Nome;
+                artistaAAtualizar.Bio = artistaRequestEdit.Bio;
+                dal.Atualizar(artistaAAtualizar);
+                return Results.Ok();
+            });
+
         // Avaliar um artista
         groupBuilderArtistas.MapPost("avaliacao", (
             HttpContext context,
             [FromBody] AvaliacaoArtistaRequest avaliacaoArtistaRequest,
             [FromServices] DAL<Artista> dalArtista,
             [FromServices] DAL<PessoaComAcesso> dalPessoaComAcesso
-            ) =>
+        ) =>
         {
             var artista = dalArtista.RecuperarPor(a => a.Id == avaliacaoArtistaRequest.ArtistaId);
             if (artista is null)
             {
                 return Results.NotFound();
             }
-            
+
             var email = context
-                            .User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value 
+                            .User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
                         ?? throw new InvalidOperationException("Pessoa não está cadastrada.");
 
             var pessoa = dalPessoaComAcesso
-                .RecuperarPor(a => a.Email.Equals(email))
-                ?? throw new InvalidOperationException("Pessoa não cadastrada.");
+                             .RecuperarPor(a => a.Email.Equals(email))
+                         ?? throw new InvalidOperationException("Pessoa não cadastrada.");
 
-            var avaliacao = artista.Avaliacoes.FirstOrDefault(a => a.ArtistaId == artista.Id && a.PessoaId == pessoa.Id);
+            var avaliacao =
+                artista.Avaliacoes.FirstOrDefault(a => a.ArtistaId == artista.Id && a.PessoaId == pessoa.Id);
 
             if (avaliacao is null)
             {
@@ -124,6 +126,25 @@ public static class ArtistasExtensions
 
             return Results.Created();
         });
+
+        // Obter a nota do artista
+        groupBuilderArtistas.MapGet("{id}/avaliacao",
+            (int id, HttpContext context, [FromServices] DAL<Artista> dalArtista,
+                [FromServices] DAL<PessoaComAcesso> dalPessoa) =>
+            {
+                var artista = dalArtista.RecuperarPor(a => a.Id == id);
+                
+                if (artista is null) return Results.NotFound();
+
+                var email = context.User.Claims.FirstOrDefault(c => c.Type.Equals(ClaimTypes.Email))?.Value ??
+                            throw new InvalidOperationException("Não foi encontrado e-mail.");
+                
+                var pessoa = dalPessoa.RecuperarPor(p => p.Email.Equals(email)) ?? throw new InvalidOperationException("E-mail não foi encontrado nessa pessoa");
+                
+                var avaliacao = artista.Avaliacoes.FirstOrDefault(a => a.ArtistaId == id && a.PessoaId == pessoa.Id);
+
+                return Results.Ok(avaliacao is null ? new AvaliacaoArtistaResponse(id, 0) : new AvaliacaoArtistaResponse(id, avaliacao.Nota));
+            });
 
         #endregion
     }
