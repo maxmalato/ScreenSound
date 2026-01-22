@@ -89,7 +89,7 @@ public static class ArtistasExtensions
             });
 
         // Avaliar um artista
-        groupBuilderArtistas.MapPost("avaliacao", (
+        groupBuilderArtistas.MapPost("/avaliacao", (
             HttpContext context,
             [FromBody] AvaliacaoArtistaRequest avaliacaoArtistaRequest,
             [FromServices] DAL<Artista> dalArtista,
@@ -97,10 +97,8 @@ public static class ArtistasExtensions
         ) =>
         {
             var artista = dalArtista.RecuperarPor(a => a.Id == avaliacaoArtistaRequest.ArtistaId);
-            if (artista is null)
-            {
-                return Results.NotFound();
-            }
+            
+            if (artista is null) return Results.NotFound();
 
             var email = context
                             .User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
@@ -110,8 +108,7 @@ public static class ArtistasExtensions
                              .RecuperarPor(a => a.Email.Equals(email))
                          ?? throw new InvalidOperationException("Pessoa não cadastrada.");
 
-            var avaliacao =
-                artista.Avaliacoes.FirstOrDefault(a => a.ArtistaId == artista.Id && a.PessoaId == pessoa.Id);
+            var avaliacao = artista.Avaliacoes.FirstOrDefault(a => a.ArtistaId == artista.Id && a.PessoaId == pessoa.Id);
 
             if (avaliacao is null)
             {

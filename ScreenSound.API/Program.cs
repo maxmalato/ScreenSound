@@ -17,7 +17,6 @@ builder.Services.AddDbContext<ScreenSoundContext>((options) =>
         .UseLazyLoadingProxies();
 });
 
-// Injetar mais um serviço
 builder.Services
     .AddIdentityApiEndpoints<PessoaComAcesso>()
     .AddEntityFrameworkStores<ScreenSoundContext>();
@@ -25,10 +24,13 @@ builder.Services
 // Injetar autorização
 builder.Services.AddAuthorization();
 
-builder.Services.AddTransient<DAL<Artista>>();
-builder.Services.AddTransient<DAL<AvaliacaoArtista>>();
-builder.Services.AddTransient<DAL<Musica>>();
-builder.Services.AddTransient<DAL<Genero>>();
+// builder.Services.AddTransient<DAL<Artista>>();
+// builder.Services.AddTransient<DAL<AvaliacaoArtista>>();
+// builder.Services.AddTransient<DAL<Musica>>();
+// builder.Services.AddTransient<DAL<Genero>>();
+
+// Adcionar um DAL genérico
+builder.Services.AddScoped(typeof(DAL<>));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -57,13 +59,9 @@ app.AddEndPointsMusicas();
 app.AddEndPointGeneros();
 app.AddEnpointAuth();
 
-// Adicionar uma camada de autoriza��o
-//app.MapGroup("auth").MapIdentityApi<PessoaComAcesso>()
-//    .WithTags("_Autoriza��o");
-
 app.MapPost("auth/logout", async ([FromServices] SignInManager<PessoaComAcesso> signInManager) =>
 {
-    // Apagar o cookie de autenticação assim que o usu�rio fizer um logout
+    // Apagar o cookie de autenticação assim que o usuário fizer um logout
     await signInManager.SignOutAsync();
 
     return Results.Ok();
