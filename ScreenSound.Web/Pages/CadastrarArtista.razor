@@ -7,7 +7,7 @@
 
     <MudText Class="mt-8" Typo="Typo.h4">Cadastro do Artista</MudText>
 
-    <MudForm>
+    <MudForm @ref="_form" @bind-IsValid="@_success">
         <MudTextField Class="mt-4" T="string" Placeholder="Nome do Artista"
                       @bind-Value="_nome"
                       Variant="Variant.Outlined"
@@ -50,6 +50,9 @@
 </MudPaper>
 
 @code {
+    private MudForm _form;
+    private bool _success;
+    
     private string? _nome;
     private string? _biografia;
     private string? _fileImage;
@@ -57,11 +60,22 @@
 
     private async Task Cadastrar()
     {
-        var request = new ArtistaRequest(_nome!, _biografia!, _fotoPerfil);
+        await _form.Validate();
+        
+        if (_form.IsValid)
+        {
+            var request = new ArtistaRequest(_nome!, _biografia!, _fotoPerfil);
 
-        await artistaAPI.AddArtistaAsync(request);
-
-        navigationManager.NavigateTo("/artistas");
+            try
+            {
+                await artistaAPI.AddArtistaAsync(request);
+                navigationManager.NavigateTo("/artistas");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Erro ao cadastrar: {ex.Message}");
+            }
+        }
     }
 
     // Upload da imagem para um artista
