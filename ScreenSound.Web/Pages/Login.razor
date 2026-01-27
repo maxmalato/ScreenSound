@@ -18,14 +18,30 @@
                               Required="true" RequiredError="Email obrigatório!"
                               OnlyValidateIfDirty="true" />
 
-                <MudTextField T="string" Label="Senha" @bind-Value="senha"
-                              InputType="InputType.Password"
-                              Variant="Variant.Outlined" Class="my-4"
-                              Required="true" RequiredError="Senha obrigatória!"
-                              OnlyValidateIfDirty="true" />
+                <MudTextField T="string" Label="Senha" 
+                              @bind-Value="senha"
+                              InputType="@(_exibirSenha ? InputType.Text : InputType.Password)"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@(_exibirSenha ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                              OnAdornmentClick="@(() => _exibirSenha = !_exibirSenha)"
+                              AdornmentAriaLabel="Mostrar senha"
+                              Variant="Variant.Outlined" 
+                              Class="my-4"
+                              Required="true" 
+                              RequiredError="Senha obrigatória!"
+                              OnlyValidateIfDirty="true" 
+                              />
 
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-6" @onclick="FazerLogin" StartIcon="@Icons.Material.Filled.Login">
-                    Acessar
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-6" @onclick="FazerLogin" Disabled="_processando" StartIcon="@(_processando ? null : Icons.Material.Filled.Login)">
+                    @if (_processando)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Acessando</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Acessar</MudText>
+                    }
                 </MudButton>
 
                 <MudButton Variant="Variant.Text" Color="Color.Secondary" href="/registrar">
@@ -39,30 +55,43 @@
 @code {
     private string? email;
     private string? senha;
+    private bool _processando = false;
+    private bool _exibirSenha = false;
 
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
 
     private async Task FazerLogin()
     {
-        var response = await authAPI.LoginAsync(email, senha);
+        _processando = true;
 
-        if (response.Sucesso)
+        try
         {
-            ISnackbar.Add("Login realizado com sucesso!", Severity.Success);
-            navigationManager.NavigateTo(ReturnUrl ?? "/");
-        } else
-        {
-            if(response.Erros is not null)
+            var response = await authAPI.LoginAsync(email, senha);
+
+            if (response.Sucesso)
             {
-                foreach(var erro in response.Erros)
-                {
-                    ISnackbar.Add(erro, Severity.Error);
-                }
-            } else
-            {
-                ISnackbar.Add("Ocorreu um erro desconhecido durante o login.", Severity.Error);
+                ISnackbar.Add("Login realizado com sucesso!", Severity.Success);
+                navigationManager.NavigateTo(ReturnUrl ?? "/");
             }
+            else
+            {
+                if (response.Erros is not null)
+                {
+                    foreach (var erro in response.Erros)
+                    {
+                        ISnackbar.Add(erro, Severity.Error);
+                    }
+                }
+                else
+                {
+                    ISnackbar.Add("Ocorreu um erro desconhecido durante o login.", Severity.Error);
+                }
+            }
+        }
+        finally
+        {
+            _processando = false;
         }
     }
 }
