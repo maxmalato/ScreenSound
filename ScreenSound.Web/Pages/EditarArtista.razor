@@ -17,14 +17,16 @@
                       Disabled="@(_isEditing)"
                       />
 
-        <MudTextField Class="mt-4" T="string" Placeholder="Biografia do artista"
-                      @bind-Value="_biografia"
-                      Variant="Variant.Outlined"
-                      Lines="4"
-                      Required="true"
-                      RequiredError="Campo obrigatório."
-                      Disabled="@(_isEditing)"
+                      <MudTextField Class="mt-4" T="string" Placeholder="Biografia do artista"
+                                    @bind-Value="_biografia"
+                                    Variant="Variant.Outlined"
+                                    Lines="4"
+                                    Required="true"
+                                    RequiredError="Campo obrigatório."
+                                    Disabled="@(_isEditing)"
                       />
+                      
+        <MudRating @bind-SelectedValue="_classificacao" @onclick="Salvar" Disabled="@(_isEditing)"/>
 
         <div class="d-flex align-center justify-content-end gap-3 mt-4">
             <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/artistas">
@@ -60,15 +62,15 @@
 </MudPaper>
 
 @code {
-    [Parameter]
-    public string? NomeArtista { get; set; }
+    [Parameter] public string? NomeArtista { get; set; }
     public ArtistaResponse? Artista { get; set; }
-    
+
     private string? _nome;
     private string? _biografia;
     private string? _fotoPerfil;
     private bool _isEditing = true;
-    
+    private int _classificacao;
+
     // Carrega os dados do artista ao inicializar o componente
     protected override async Task OnInitializedAsync()
     {
@@ -76,35 +78,40 @@
 
         _nome = Artista!.Nome;
         _biografia = Artista!.Bio;
+        _classificacao = Artista.Classificacao is double c ? (int)Math.Round(c) : 0;
     }
-    
+
     // Alterar o nome dos botões quando o usuário clica em "Editar"
     private void HabilitarEdicao()
     {
         _isEditing = false;
     }
-    
+
     // Cancela a edição e restaura os dados antigos
     private void CancelarEdicao()
     {
         _isEditing = true;
         _nome = Artista!.Nome;
         _biografia = Artista!.Bio;
+
+        _classificacao = Artista.Classificacao is double c ? (int)Math.Round(c) : 0;
     }
-    
+
     // Edita e salva as alterações do artista
     private async Task Salvar()
     {
         if (Artista is not null)
         {
             var requestEdit = new ArtistaRequestEdit(Artista!.Id, _nome!, _biografia!, _fotoPerfil);
-            
+
             await ArtistaApi.UpdateArtistaAsync(requestEdit);
-            
+
+            Artista.Classificacao = _classificacao;
+
             NavigationManager.NavigateTo("/artistas");
         }
     }
-    
+
     // Exclui o artista e navega de volta para a lista de artistas
     private async Task Excluir()
     {

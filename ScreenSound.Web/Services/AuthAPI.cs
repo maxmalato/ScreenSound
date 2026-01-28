@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using ScreenSound.Web.Response;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Authorization;
+using ScreenSound.Web.Response;
 
 namespace ScreenSound.Web.Services;
 
