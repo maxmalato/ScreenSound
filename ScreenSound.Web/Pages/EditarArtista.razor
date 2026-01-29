@@ -26,7 +26,7 @@
                                     Disabled="@(_isEditing)"
                       />
                       
-        <MudRating @bind-SelectedValue="_classificacao" @onclick="Salvar" Disabled="@(_isEditing)"/>
+        <MudRating @bind-SelectedValue="_classificacao" Disabled="@(_isEditing)"/>
 
         <div class="d-flex align-center justify-content-end gap-3 mt-4">
             <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/artistas">
@@ -78,7 +78,8 @@
 
         _nome = Artista!.Nome;
         _biografia = Artista!.Bio;
-        _classificacao = Artista.Classificacao is double c ? (int)Math.Round(c) : 0;
+        var avaliacaoResponse = await ArtistaApi.GetAvaliacaoDaPessoaLogadaAsync(Artista.Id);
+        _classificacao = (int)Math.Round(avaliacaoResponse?.Nota ?? 0);
     }
 
     // Alterar o nome dos botões quando o usuário clica em "Editar"
@@ -103,11 +104,10 @@
         if (Artista is not null)
         {
             var requestEdit = new ArtistaRequestEdit(Artista!.Id, _nome!, _biografia!, _fotoPerfil);
-
             await ArtistaApi.UpdateArtistaAsync(requestEdit);
 
-            Artista.Classificacao = _classificacao;
-
+            await ArtistaApi.AvaliarArtistaAsync(Artista.Id, _classificacao);
+            
             NavigationManager.NavigateTo("/artistas");
         }
     }
@@ -118,4 +118,4 @@
         await ArtistaApi.DeleteArtistaAsync(Artista!.Id);
         NavigationManager.NavigateTo("/artistas");
     }
-}
+};

@@ -10,7 +10,18 @@
             @Artista!.Bio
         </MudText>
     </MudCardContent>
-    <MudRating SelectedValue="@Convert.ToInt32(Artista!.Classificacao)"></MudRating>
+    
+    <div class="d-flex align-center gap-2">
+        <MudRating 
+            ReadOnly="true"
+            Disabled="true"
+            SelectedValue="@((int)Math.Round(Artista!.Classificacao ?? 0))"
+            Color="Color.Warning"/>
+        <MudText Typo="Typo.caption" Class="mt-1">
+            @Artista!.Classificacao.ToString()
+        </MudText>
+    </div>
+    
     <MudCardActions>
         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href=@($"/editar-artista/{Artista!.Nome}")>
             Ver Detalhes
@@ -21,7 +32,8 @@
 @code {
     [Parameter]
     public ArtistaResponse? Artista { get; set; }
-    public string? Imagem { get; set; }
+
+    private string? Imagem { get; set; }
 
     protected override void OnInitialized()
     {
