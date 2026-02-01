@@ -1,24 +1,55 @@
-﻿<MudCard Class="mud-height-full">
+﻿<MudCard Elevation="3" Class="mud-height-full d-flex flex-row rounded-lg hover-elevated overflow-hidden">
+    
+    <div class="mud-theme-primary" style="width: 6px;"></div>
 
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6">@generoResponse!.Nome</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudText Typo="Typo.body2">
-            @generoResponse!.Descricao
-        </MudText>
-    </MudCardContent>
-    <MudCardActions>
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href=@($"/editar-genero/{generoResponse?.Nome}")>
-            Ver Detalhes
-        </MudButton>
-    </MudCardActions>
+    <div class="d-flex flex-column flex-grow-1">
+        <MudCardHeader Class="pb-0">
+            <CardHeaderContent>
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudIcon Icon="@Icons.Material.Filled.MusicNote" Color="Color.Primary" Size="Size.Small" />
+                    <MudText Typo="Typo.overline" Class="mud-text-secondary">Gênero Musical</MudText>
+                </div>
+                <MudText Typo="Typo.h6" Class="fw-bold">@generoResponse?.Nome</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+
+        <MudCardContent Class="flex-grow-1 pt-2">
+            <MudText Typo="Typo.body2" 
+                     Class="mud-text-secondary" 
+                     Style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                @generoResponse?.Descricao
+            </MudText>
+        </MudCardContent>
+
+        <MudCardActions Class="pb-4 px-4 mt-auto">
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       FullWidth="true" 
+                       Href=@($"/editar-genero/{generoResponse?.Nome}")
+                       Class="rounded-pill mud-text-transform-none py-2"
+                       StartIcon="@Icons.Material.Filled.Edit">
+                Ver Detalhes
+            </MudButton>
+        </MudCardActions>
+    </div>
 </MudCard>
+
+<style>
+    .hover-elevated {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    
+    .hover-elevated:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
     [Parameter]
     public GeneroResponse? generoResponse { get; set; }
-
 }

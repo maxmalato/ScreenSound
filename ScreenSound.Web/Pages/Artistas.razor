@@ -1,36 +1,88 @@
 ﻿@page "/artistas"
 @using Microsoft.AspNetCore.Authorization
-
 @inject ArtistaAPI artistaAPI
 @inject NavigationManager navigationManager
 
-<MudStack Class="my-4" Row="true" Justify="Justify.SpaceBetween">
-    <MudText Class="mb-4" Typo="Typo.h4">Artistas Cadastrados</MudText>
-    <MudPagination Count="@_totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
-</MudStack>
-
-@if (_artistasPorPagina is not null)
-{
-    <MudGrid>
-        @foreach (var artista in _artistasPorPagina)
-        {
-            <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
-                <CardArtista Artista="artista" />
-            </MudItem>
-        }
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    <MudGrid Class="mb-6 align-center">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.h4" Class="fw-bold">Artistas</MudText>
+            <MudText Typo="Typo.subtitle1" Class="mud-text-secondary">Explore e gerencie seus artistas favoritos</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="6" Class="d-flex justify-sm-end">
+            <MudTextField T="string"
+                          ValueChanged="@(s => OnSearch(s))"
+                          Placeholder="Pesquisar artista..." 
+                          Adornment="Adornment.Start" 
+                          AdornmentIcon="@Icons.Material.Filled.Search" 
+                          Variant="Variant.Outlined" 
+                          Margin="Margin.Dense"
+                          Class="mud-width-full"
+                          Style="max-width: 300px;"
+                          Immediate="true"
+                          Clearable="true"
+                          OnClearClick="ResetSearch" />
+        </MudItem>
     </MudGrid>
-}
-else
-{
-    <p><em>Carregando...</em></p>
-}
+
+    @if (_artistasPorPagina is not null)
+    {
+        @if (_artistasPorPagina.Any())
+        {
+            <MudGrid>
+                @foreach (var artista in _artistasPorPagina)
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
+                        <CardArtista Artista="artista" />
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <div class="d-flex justify-center mt-12 mb-8">
+                <MudPagination Color="Color.Primary" 
+                               Variant="Variant.Filled" 
+                               Count="@_totalPaginas" 
+                               SelectedChanged="PaginaMudou" 
+                               Class="mud-text-transform-none" />
+            </div>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
+                Nenhum artista encontrado com esse nome.
+            </MudAlert>
+        }
+    }
+    else
+    {
+        <MudGrid>
+            @for (int i = 0; i < 8; i++)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="250px" Class="rounded-lg mb-2" />
+                    <MudSkeleton Width="60%" Height="30px" />
+                    <MudSkeleton Width="40%" />
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</MudContainer>
+
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
     private ICollection<ArtistaResponse>? _artistas;
-    private int _tamanho = 8; // Quantidade de artistas que devem ser mostrados na página
+    private ICollection<ArtistaResponse>? _artistasFiltrados;
+    private ICollection<ArtistaResponse>? _artistasPorPagina;
+    
+    private string _searchString = "";
+    private int _tamanho = 8;
     private int _totalItens;
     private int _totalPaginas;
-    private ICollection<ArtistaResponse>? _artistasPorPagina;
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,17 +91,43 @@ else
         if (_artistas is not null)
         {
             _artistas = _artistas.OrderByDescending(a => a.Id).ToList();
-            _totalItens = _artistas.Count();
-            _totalPaginas = Convert.ToInt32(Math.Ceiling((_totalItens * 1.0) / _tamanho));
-
-            this.PaginaMudou(1);
+            _artistasFiltrados = _artistas;
+            AtualizarPaginacao();
         }
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        
+        if (_artistas != null)
+        {
+            _artistasFiltrados = _artistas
+                .Where(a => a.Nome.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            
+            AtualizarPaginacao();
+        }
+    }
+
+    private void ResetSearch()
+    {
+        _searchString = "";
+        _artistasFiltrados = _artistas;
+        AtualizarPaginacao();
+    }
+
+    private void AtualizarPaginacao()
+    {
+        _totalItens = _artistasFiltrados?.Count() ?? 0;
+        _totalPaginas = (int)Math.Ceiling((_totalItens * 1.0) / _tamanho);
+        PaginaMudou(1); // Garante que a visualização resete para o início da busca
     }
 
     private void PaginaMudou(int numeroPagina)
     {
         var indice = numeroPagina - 1;
-        _artistasPorPagina = _artistas!
+        _artistasPorPagina = _artistasFiltrados?
             .Skip(_tamanho * indice)
             .Take(_tamanho)
             .ToList();

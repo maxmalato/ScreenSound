@@ -4,179 +4,261 @@
 @inject GeneroAPI generoAPI
 @inject MusicaAPI musicaAPI
 @inject NavigationManager navigationManager
+@inject ISnackbar ISnackbar
 
-<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
-
-    <MudText Class="mt-8" Typo="Typo.h4">Edição de música</MudText>
-
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-10 mb-10">
     @if (MusicaResponse is not null)
     {
-        <MudForm>
-            <MudTextField Class="mt-4" T="string" Placeholder="Nome da música"
-                          @bind-Value="_nome"
-                          Variant="Variant.Outlined"
-                          Required="true"
-                          RequiredError="Campo obrigatório."
-                          Disabled="@(_isEditing)" />
-
-
-            <MudSelect Class="mt-4" @bind-Value="ArtistaDaMusica" T="ArtistaResponse" Label="Artistas" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" Disabled="@(_isEditing)">
-                @if (_artistas is not null)
-                {
-                    @foreach (var artista in _artistas)
-                    {
-                        <MudSelectItem Value="artista">@artista.Nome</MudSelectItem>
-                    }
-                }
-            </MudSelect>
-
-            <MudNumericField Class="mt-4" T="int" Placeholder="Ano de lançamento"
-                             @bind-Value="_anoLancamento"
-                             Variant="Variant.Outlined"
-                             Lines="1"
-                             Required="true"
-                             RequiredError="Campo obrigatório."
-                             Disabled="@(_isEditing)" />
-
-            <MudSelect Class="mt-4" ValueChanged="GeneroSelecionado" T="GeneroResponse" Label="Gêneros" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" Disabled="@(_isEditing)">
-                @if (_generos is not null)
-                {
-                    @foreach (var genero in _generos)
-                    {
-                        <MudSelectItem Value="genero">@genero.Nome</MudSelectItem>
-                    }
-                }
-
-                @if (GenerosSelecionados is not null && GenerosSelecionados.Any())
-                {
-                    foreach (var genero in GenerosSelecionados)
-                    {
-                        <MudAlert Severity="Severity.Info">
-                            @genero.Nome adicionado como gênero da música.
-                        </MudAlert>
-                    }
-                }
-
-            </MudSelect>
-
-            <div class="d-flex align-center justify-content-end gap-3 mt-4">
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/musicas-por-artista">
-                    Voltar
-                </MudButton>
-
-                @if (!_isEditing)
-                {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="CancelarEdicao">
-                        Cancelar
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" @onclick="Salvar">
-                        Salvar
-                    </MudButton>
-                }
-                else
-                {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="HabilitarEdicao">
-                        Editar
-                    </MudButton>
-
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" @onclick="Excluir">
-                        Excluir
-                    </MudButton>
-                }
+        <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+            <div class="d-flex align-center mb-8">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" Href="/musicas-por-artista" Class="mr-4" />
+                <div>
+                    <MudText Typo="Typo.h4" Class="fw-bold">@(_isEditing ? "Detalhes da Música" : "Editando Música")</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Gerencie os dados técnicos e gêneros</MudText>
+                </div>
             </div>
 
-        </MudForm>
+            <MudForm>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="Nome da Música"
+                                      @bind-Value="_nome"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="O nome é obrigatório."
+                                      Disabled="@(_isEditing)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.MusicNote" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="8">
+                        <MudSelect T="ArtistaResponse" 
+                                   Label="Artista Responsável" 
+                                   @bind-Value="ArtistaDaMusica"
+                                   Variant="Variant.Outlined" 
+                                   Disabled="@(_isEditing)"
+                                   AnchorOrigin="Origin.BottomCenter"
+                                   AdornmentIcon="@Icons.Material.Filled.Person">
+                            @if (_artistas is not null)
+                            {
+                                @foreach (var artista in _artistas)
+                                {
+                                    <MudSelectItem Value="artista">@artista.Nome</MudSelectItem>
+                                }
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Ano"
+                                         @bind-Value="_anoLancamento"
+                                         Variant="Variant.Outlined"
+                                         Disabled="@(_isEditing)"
+                                         Adornment="Adornment.Start"
+                                         AdornmentIcon="@Icons.Material.Filled.CalendarToday" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudSelect T="GeneroResponse" 
+                                   Label="Adicionar Gêneros" 
+                                   Variant="Variant.Outlined" 
+                                   Disabled="@(_isEditing)"
+                                   AnchorOrigin="Origin.BottomCenter"
+                                   ValueChanged="GeneroSelecionado"
+                                   AdornmentIcon="@Icons.Material.Filled.Label">
+                            @if (_generos is not null)
+                            {
+                                @foreach (var genero in _generos)
+                                {
+                                    <MudSelectItem Value="genero">@genero.Nome</MudSelectItem>
+                                }
+                            }
+                        </MudSelect>
+
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            @if (GenerosSelecionados is not null && GenerosSelecionados.Any())
+                            {
+                                foreach (var genero in GenerosSelecionados)
+                                {
+                                    <MudChip T="GeneroResponse" 
+                                             Value="@genero"
+                                             Color="Color.Primary" 
+                                             Variant="Variant.Filled" 
+                                             OnClose="@((c) => { if(!_isEditing) GenerosSelecionados.Remove(genero); })"
+                                             Disabled="@(_isEditing)"
+                                             Class="mud-text-transform-none">
+                                        @genero.Nome
+                                    </MudChip>
+                                }
+                            }
+                        </div>
+                    </MudItem>
+
+                    <MudItem xs="12" Class="d-flex flex-column flex-sm-row justify-end gap-3 mt-6">
+                        @if (_isEditing)
+                        {
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       @onclick="HabilitarEdicao"
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       Class="rounded-pill px-8 mud-text-transform-none">
+                                Editar Música
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Error" 
+                                       @onclick="Excluir"
+                                       StartIcon="@Icons.Material.Filled.Delete"
+                                       Class="rounded-pill px-8 mud-text-transform-none">
+                                Excluir
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Text" 
+                                       Color="Color.Secondary" 
+                                       @onclick="CancelarEdicao"
+                                       Class="mud-text-transform-none">
+                                Cancelar
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Success" 
+                                       @onclick="Salvar"
+                                       Disabled="_processando"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       Class="rounded-pill px-10 mud-text-transform-none">
+                                @if (_processando)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                    <span>Salvando...</span>
+                                }
+                                else
+                                {
+                                    <span>Salvar Alterações</span>
+                                }
+                            </MudButton>
+                        }
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudPaper>
     }
     else
     {
-        <MudText>Carregando música...</MudText>
+        <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="50px" Width="30%" Class="mb-6" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="60px" Class="mb-4" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="60px" Width="60%" Class="mb-4" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="100px" Class="mb-4" />
+        </MudPaper>
     }
+</MudContainer>
 
-</MudPaper>
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
-
-    [Parameter]
-    public string? NomeMusica { get; set; }
+    [Parameter] public string? NomeMusica { get; set; }
 
     private MusicaResponse? MusicaResponse { get; set; }
-    private List<GeneroResponse>? GenerosSelecionados { get; set; } = new();
+    private List<GeneroResponse> GenerosSelecionados { get; set; } = new();
     private ArtistaResponse? ArtistaDaMusica { get; set; }
 
     private int _anoLancamento;
     private string? _nome;
     private bool _isEditing = true;
+    private bool _processando = false;
 
     private ICollection<ArtistaResponse>? _artistas;
     private ICollection<GeneroResponse>? _generos;
 
     protected override async Task OnInitializedAsync()
     {
-        MusicaResponse = await musicaAPI.GetMusicaPorNomeAsync(NomeMusica!);
-
-        _nome = MusicaResponse!.Nome;
-        _anoLancamento = MusicaResponse!.AnoLancamento;
-
-        _artistas = await artistaAPI.GetArtistasAsync();
-        _generos = await generoAPI.GetGenerosAsync();
-
-        if (_artistas is not null)
+        try 
         {
-            ArtistaDaMusica = _artistas.FirstOrDefault(a => a.Id == MusicaResponse.ArtistaId);
+            MusicaResponse = await musicaAPI.GetMusicaPorNomeAsync(NomeMusica!);
+            _artistas = await artistaAPI.GetArtistasAsync();
+            _generos = await generoAPI.GetGenerosAsync();
+
+            if (MusicaResponse is not null)
+            {
+                _nome = MusicaResponse.Nome;
+                _anoLancamento = MusicaResponse.AnoLancamento;
+
+                if (_artistas is not null)
+                {
+                    ArtistaDaMusica = _artistas.FirstOrDefault(a => a.Id == MusicaResponse.ArtistaId);
+                }
+                
+            }
+        }
+        catch (Exception ex)
+        {
+            ISnackbar.Add("Erro ao carregar dados da música.", Severity.Error);
         }
     }
 
-    // Alterar o nome dos botões quando o usuário clica em "Editar"
-    private void HabilitarEdicao()
-    {
-        _isEditing = false;
-    }
+    private void HabilitarEdicao() => _isEditing = false;
 
-    // Cancela a edição e restaura os dados antigos
     private void CancelarEdicao()
     {
         _isEditing = true;
         _nome = MusicaResponse!.Nome;
         _anoLancamento = MusicaResponse.AnoLancamento;
-    }
-
-    private void ArtistaSelecionado(ArtistaResponse artistaSelecionado)
-    {
-        ArtistaDaMusica = artistaSelecionado;
+        // Restaurar artista original
+        ArtistaDaMusica = _artistas?.FirstOrDefault(a => a.Id == MusicaResponse.ArtistaId);
     }
 
     private void GeneroSelecionado(GeneroResponse generoSelecionado)
     {
-        if (GenerosSelecionados is null)
-            GenerosSelecionados = new List<GeneroResponse>();
-        if (!GenerosSelecionados.Contains(generoSelecionado))
+        if (generoSelecionado is not null && !GenerosSelecionados.Any(g => g.Id == generoSelecionado.Id))
+        {
             GenerosSelecionados.Add(generoSelecionado);
-        else
-            GenerosSelecionados.Remove(generoSelecionado);
+        }
     }
 
     private async Task Salvar()
     {
-        if(ArtistaDaMusica is null)
+        if (ArtistaDaMusica is null)
         {
-            Console.WriteLine("Nenhum artista selecionado.");
+            ISnackbar.Add("Selecione um artista para continuar.", Severity.Warning);
             return;
         }
 
-        if (MusicaResponse is not null)
+        _processando = true;
+        try
         {
             var requestEdit = new MusicaRequestEdit(MusicaResponse!.Id, _nome!, ArtistaDaMusica.Id, _anoLancamento);
-
             await musicaAPI.UpdateMusicaAsync(requestEdit);
 
+            ISnackbar.Add("Música atualizada com sucesso!", Severity.Success);
             navigationManager.NavigateTo("/musicas-por-artista");
+        }
+        catch (Exception ex)
+        {
+            ISnackbar.Add("Erro ao salvar no Azure SQL.", Severity.Error);
+        }
+        finally
+        {
+            _processando = false;
         }
     }
 
     public async Task Excluir()
     {
-        await musicaAPI.DeleteMusicaAsync(MusicaResponse!.Id);
-
-        navigationManager.NavigateTo("/musicas-por-artista");
+        try 
+        {
+            await musicaAPI.DeleteMusicaAsync(MusicaResponse!.Id);
+            ISnackbar.Add("Música removida do catálogo.", Severity.Info);
+            navigationManager.NavigateTo("/musicas-por-artista");
+        }
+        catch 
+        {
+            ISnackbar.Add("Erro ao excluir música.", Severity.Error);
+        }
     }
 }

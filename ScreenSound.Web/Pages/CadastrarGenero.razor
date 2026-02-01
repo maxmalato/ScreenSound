@@ -2,47 +2,104 @@
 
 @inject GeneroAPI generoAPI
 @inject NavigationManager navigationManager
+@inject ISnackbar ISnackbar
 
-<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10 mb-10">
+    <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+        
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-8 fw-bold">Novo Gênero</MudText>
 
-    <MudText Class="mt-8" Typo="Typo.h4">Cadastro de Gênero</MudText>
+        <MudForm @ref="_form" @bind-IsValid="@_success">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Nome do Gênero"
+                                  @bind-Value="_nome"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  RequiredError="O nome é obrigatório."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Label"
+                                  Class="mb-2" />
+                </MudItem>
 
-    <MudForm>
-        <MudTextField Class="mt-4" T="string" Placeholder="Nome do gênero"
-                      @bind-Value="_nome"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      RequiredError="Campo obrigatório." />
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Descrição"
+                                  @bind-Value="_descricao"
+                                  Variant="Variant.Outlined"
+                                  Lines="4"
+                                  Required="true"
+                                  RequiredError="A descrição é obrigatória."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Description" />
+                </MudItem>
 
-        <MudTextField Class="mt-4" T="string" Placeholder="Descrição do gênero"
-                      @bind-Value="_descricao"
-                      Variant="Variant.Outlined"
-                      Lines="4"
-                      Required="true"
-                      RequiredError="Campo obrigatório." />
+                <MudItem xs="12" Class="d-flex flex-column flex-sm-row justify-end gap-3 mt-6">
+                    <MudButton Variant="Variant.Text" 
+                               Color="Color.Secondary" 
+                               Href="/generos"
+                               Class="mud-text-transform-none px-6">
+                        Cancelar
+                    </MudButton>
 
-        <div class="d-flex align-center justify-content-end gap-3 mt-4">
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/generos">
-                Voltar
-            </MudButton>
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               Class="px-10 rounded-pill mud-text-transform-none"
+                               @onclick="Cadastrar"
+                               Disabled="_processando">
+                        @if (_processando)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Salvando...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Finalizar Cadastro</MudText>
+                        }
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="Cadastrar">
-                Cadastrar
-            </MudButton>
-        </div>
-    </MudForm>
-</MudPaper>
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
+    private MudForm _form = null!;
+    private bool _success;
+    private bool _processando = false;
+
     private string? _nome;
     private string? _descricao;
 
     private async Task Cadastrar()
     {
-        var request = new GeneroRequest(_nome!, _descricao!);
+        await _form.Validate();
 
-        await generoAPI.AddGeneroAsync(request);
-
-        navigationManager.NavigateTo("/generos");
+        if (_form.IsValid)
+        {
+            _processando = true;
+            try
+            {
+                var request = new GeneroRequest(_nome!, _descricao!);
+                
+                await generoAPI.AddGeneroAsync(request);
+                
+                ISnackbar.Add("Gênero cadastrado com sucesso!", Severity.Success);
+                navigationManager.NavigateTo("/generos");
+            }
+            catch (Exception ex)
+            {
+                ISnackbar.Add($"Erro ao salvar no Azure: {ex.Message}", Severity.Error);
+            }
+            finally
+            {
+                _processando = false;
+            }
+        }
     }
 }

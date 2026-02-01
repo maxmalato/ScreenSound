@@ -1,33 +1,48 @@
-﻿<MudCard Class="mud-height-full">
-    <MudCardMedia Image=@Imagem></MudCardMedia>
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6">@Artista!.Nome</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudText Typo="Typo.body2">
+﻿<MudCard Elevation="4" Class="mud-height-full d-flex flex-column rounded-lg hover-elevated">
+    <MudCardMedia Image="@Imagem" Height="250" Alt="@Artista!.Nome" />
+
+    <MudCardContent Class="flex-grow-1">
+        <MudText Typo="Typo.h6" Class="fw-bold mb-1">@Artista!.Nome</MudText>
+        
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4" Style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
             @Artista!.Bio
         </MudText>
+
+        <div class="d-flex align-center gap-2 mt-auto">
+            <MudRating ReadOnly="true" 
+                        SelectedValue="@((int)Math.Round(Artista!.Classificacao ?? 0))" 
+                        Color="Color.Warning" 
+                        Size="Size.Small" />
+            <MudText Typo="Typo.caption" Class="pt-1 fw-bold">
+                @(Artista!.Classificacao.HasValue ? Artista!.Classificacao.Value.ToString("F1") : "0.0")
+            </MudText>
+        </div>
     </MudCardContent>
-    
-    <div class="d-flex align-center gap-2">
-        <MudRating 
-            ReadOnly="true"
-            Disabled="true"
-            SelectedValue="@((int)Math.Round(Artista!.Classificacao ?? 0))"
-            Color="Color.Warning"/>
-        <MudText Typo="Typo.caption" Class="mt-1">
-            @Artista!.Classificacao.ToString()
-        </MudText>
-    </div>
-    
-    <MudCardActions>
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href=@($"/editar-artista/{Artista!.Nome}")>
+
+    <MudCardActions Class="pb-4 px-4">
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Primary" 
+                   FullWidth="true" 
+                   Href=@($"/editar-artista/{Artista!.Nome}")
+                   Class="rounded-pill mud-text-transform-none py-2"
+                   StartIcon="@Icons.Material.Filled.Info">
             Ver Detalhes
         </MudButton>
     </MudCardActions>
 </MudCard>
+
+<style>
+    .hover-elevated {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .hover-elevated:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
     [Parameter]
@@ -37,6 +52,8 @@
 
     protected override void OnInitialized()
     {
-        Imagem = Artista!.FotoPerfil!.Contains("Fotos") ? $"https://localhost:7089/{Artista!.FotoPerfil}" : "images/cardArtista.png";
+        Imagem = Artista?.FotoPerfil != null && Artista.FotoPerfil.Contains("Fotos") 
+                 ? $"https://localhost:7089/{Artista.FotoPerfil}" 
+                 : "images/cardArtista.png";
     }
 }

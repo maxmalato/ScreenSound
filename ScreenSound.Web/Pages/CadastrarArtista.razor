@@ -2,56 +2,110 @@
 
 @inject ArtistaAPI artistaAPI
 @inject NavigationManager navigationManager
+@inject ISnackbar ISnackbar
 
-<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
+@* MudContainer centraliza o conteúdo em qualquer tela (Mobile/Desktop) *@
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-10 mb-10">
+    <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+        
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-8 fw-bold">Novo Artista</MudText>
 
-    <MudText Class="mt-8" Typo="Typo.h4">Cadastro do Artista</MudText>
+        <MudForm @ref="_form" @bind-IsValid="@_success">
+            <MudGrid>
+                @* Área da Foto: Preview circular e intuitivo *@
+                <MudItem xs="12" Class="d-flex flex-column align-center mb-6">
+                    @if (!string.IsNullOrEmpty(_fileImage))
+                    {
+                        <MudImage Src="@_fileImage" 
+                                  Elevation="3"
+                                  Class="rounded-circle mb-4" 
+                                  Style="width: 160px; height: 160px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        @* Placeholder moderno quando não há foto *@
+                        <MudAvatar Color="Color.Surface" Variant="Variant.Outlined" Style="width: 160px; height: 160px;" Class="mb-4">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" Style="font-size: 5rem;" Color="Color.Primary" />
+                        </MudAvatar>
+                    }
 
-    <MudForm @ref="_form" @bind-IsValid="@_success">
-        <MudTextField Class="mt-4" T="string" Placeholder="Nome do Artista"
-                      @bind-Value="_nome"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      RequiredError="Campo obrigatório." />
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".jpeg">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.PhotoCamera"
+                                       Class="mud-text-transform-none"
+                                       HtmlTag="label">
+                                Escolher Foto
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
+                    <MudText Typo="Typo.caption" Class="mt-2 mud-text-secondary">Opcional: JPEG até 2MB</MudText>
+                </MudItem>
 
-        <MudTextField Class="mt-4" T="string" Placeholder="Biografia do artista"
-                      @bind-Value="_biografia"
-                      Variant="Variant.Outlined"
-                      Lines="4"
-                      Required="true"
-                      RequiredError="Campo obrigatório." />
+                @* Inputs com ícones para facilitar a leitura *@
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Nome do Artista"
+                                  @bind-Value="_nome"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  RequiredError="O nome é obrigatório."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Badge" />
+                </MudItem>
 
-        @if (!string.IsNullOrEmpty(_fileImage))
-        {
-            <MudImage Class="mt-4 rounded-3" Width="150" Height="220" Src="@_fileImage" ObjectFit="ObjectFit.Cover" />
-        }
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Biografia"
+                                  @bind-Value="_biografia"
+                                  Variant="Variant.Outlined"
+                                  Lines="4"
+                                  Required="true"
+                                  RequiredError="A biografia é obrigatória."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Description" />
+                </MudItem>
 
-        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile" Accept=".jpeg" Class="mt-4">
-            <ActivatorContent>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.PhotoCamera"
-                           HtmlTag="label">
-                    Foto do perfil
-                </MudButton>
-            </ActivatorContent>
-        </MudFileUpload>
+                @* Ações: Alinhamento responsivo *@
+                <MudItem xs="12" Class="d-flex flex-column flex-sm-row justify-end gap-3 mt-6">
+                    <MudButton Variant="Variant.Text" 
+                               Color="Color.Secondary" 
+                               Href="/artistas"
+                               Class="mud-text-transform-none px-6">
+                        Cancelar
+                    </MudButton>
 
-        <div class="d-flex align-center justify-content-end gap-3 mt-4">
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/artistas">
-                Voltar
-            </MudButton>
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               Class="px-10 rounded-pill mud-text-transform-none"
+                               @onclick="Cadastrar"
+                               Disabled="_processando">
+                        @if (_processando)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Processando...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Finalizar Cadastro</MudText>
+                        }
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="Cadastrar">
-                Cadastrar
-            </MudButton>
-        </div>
-    </MudForm>
-</MudPaper>
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
-    private MudForm _form;
+    private MudForm _form = null!;
     private bool _success;
+    private bool _processando = false;
     
     private string? _nome;
     private string? _biografia;
@@ -64,33 +118,48 @@
         
         if (_form.IsValid)
         {
-            var request = new ArtistaRequest(_nome!, _biografia!, _fotoPerfil);
-
+            _processando = true;
             try
             {
+                // GARANTIA: Se _fotoPerfil for null, enviamos string vazia para a API não quebrar
+                var request = new ArtistaRequest(_nome!, _biografia!, _fotoPerfil ?? string.Empty);
+                
                 await artistaAPI.AddArtistaAsync(request);
+                
+                ISnackbar.Add("Artista cadastrado com sucesso!", Severity.Success);
                 navigationManager.NavigateTo("/artistas");
             }
             catch(Exception ex)
             {
-                Console.WriteLine($"Erro ao cadastrar: {ex.Message}");
+                // Exibe o erro real no Snackbar para facilitar o seu Debug no Azure
+                ISnackbar.Add($"Erro ao salvar: {ex.Message}", Severity.Error);
+            }
+            finally
+            {
+                _processando = false;
             }
         }
     }
 
-    // Upload da imagem para um artista
     private async Task UploadFile(IBrowserFile file)
     {
-        var format = "image/jpeg";
-        var resizedImage = await file.RequestImageFileAsync(format, 200, 200);
+        try 
+        {
+            var format = "image/jpeg";
+            var resizedImage = await file.RequestImageFileAsync(format, 250, 250);
 
-        using var fileStream = resizedImage.OpenReadStream();
-        using var memoryStream = new MemoryStream();
-        await fileStream.CopyToAsync(memoryStream);
+            using var fileStream = resizedImage.OpenReadStream();
+            using var memoryStream = new MemoryStream();
+            await fileStream.CopyToAsync(memoryStream);
 
-        var imageUpload = Convert.ToBase64String(memoryStream.ToArray());
-        
-        _fileImage = $"data:{format};base64, {imageUpload}";
-        _fotoPerfil = imageUpload;
+            var imageUpload = Convert.ToBase64String(memoryStream.ToArray());
+            
+            _fileImage = $"data:{format};base64,{imageUpload}";
+            _fotoPerfil = imageUpload;
+        }
+        catch (Exception ex)
+        {
+            ISnackbar.Add("Erro ao processar a imagem.", Severity.Warning);
+        }
     }
 }

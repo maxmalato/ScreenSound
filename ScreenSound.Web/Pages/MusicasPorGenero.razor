@@ -2,24 +2,50 @@
 @inject GeneroAPI generoAPI
 @inject MusicaAPI musicaAPI
 
-<MudContainer Class="mt-8">
-    <MudText Typo="Typo.h4" Class="mb-4">Músicas por Gênero</MudText>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8 mb-12">
+    <MudText Typo="Typo.h4" Class="fw-bold mb-2">Explorar por Gênero</MudText>
+    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-6">Selecione um estilo para filtrar seu catálogo musical</MudText>
 
-    <MudPaper Class="pa-4 mb-8">
-        <MudSelect T="GeneroResponse" Label="Selecione um Gênero" 
-                   ValueChanged="OnGeneroChanged" Variant="Variant.Outlined" 
-                   AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-            @if (_generos is not null)
-            {
+    <MudPaper Class="pa-4 mb-8 mud-elevation-2 rounded-lg">
+        <MudText Typo="Typo.overline" Class="mb-2 d-block">Gêneros Disponíveis</MudText>
+        @if (_generos is not null)
+        {
+            <MudChipSet T="GeneroResponse" SelectedValueChanged="OnGeneroChanged" Filter="true" Mandatory="false">
                 @foreach (var genero in _generos)
                 {
-                    <MudSelectItem Value="@genero">@genero.Nome</MudSelectItem>
+                    <MudChip Value="@genero" 
+                             Text="@genero.Nome" 
+                             Variant="Variant.Text" 
+                             Color="Color.Primary" 
+                             SelectedColor="Color.Primary" 
+                             Class="mud-text-transform-none" />
                 }
-            }
-        </MudSelect>
+            </MudChipSet>
+        }
+        else
+        {
+            <div class="d-flex gap-2">
+                <MudSkeleton Width="80px" Height="40px" Class="rounded-pill" />
+                <MudSkeleton Width="100px" Height="40px" Class="rounded-pill" />
+                <MudSkeleton Width="90px" Height="40px" Class="rounded-pill" />
+            </div>
+        }
     </MudPaper>
 
-    @if (_musicasFiltradas is not null)
+    @if (_carregando)
+    {
+        <MudGrid>
+            @for (int i = 0; i < 4; i++)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" Class="rounded-lg mb-2" />
+                    <MudSkeleton Width="60%" />
+                    <MudSkeleton Width="40%" />
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else if (_musicasFiltradas is not null)
     {
         @if (_musicasFiltradas.Any())
         {
@@ -34,18 +60,26 @@
         }
         else
         {
-            <MudAlert Severity="Severity.Info">Nenhuma música encontrada para este gênero.</MudAlert>
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="rounded-lg">
+                Nenhuma música encontrada para este gênero. Tente selecionar outro estilo.
+            </MudAlert>
         }
     }
 </MudContainer>
 
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
+
 @code {
     private ICollection<GeneroResponse>? _generos;
     private ICollection<MusicaResponse>? _musicasFiltradas;
+    private bool _carregando = false;
 
     protected override async Task OnInitializedAsync()
     {
-        // Carrega a lista de gêneros para o Select
         _generos = await generoAPI.GetGenerosAsync();
     }
 
@@ -53,8 +87,19 @@
     {
         if (genero is not null)
         {
-            // Busca as músicas sempre que o gênero mudar no select
-            _musicasFiltradas = await musicaAPI.GetMusicasPorGeneroAsync(genero.Id);
+            _carregando = true;
+            try 
+            {
+                _musicasFiltradas = await musicaAPI.GetMusicasPorGeneroAsync(genero.Id);
+            }
+            finally 
+            {
+                _carregando = false;
+            }
+        }
+        else 
+        {
+            _musicasFiltradas = null;
         }
     }
 }

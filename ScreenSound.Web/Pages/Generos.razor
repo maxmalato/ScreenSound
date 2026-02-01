@@ -1,36 +1,90 @@
 ﻿@page "/generos"
 @using Microsoft.AspNetCore.Authorization
-
 @inject GeneroAPI generoAPI
 @inject NavigationManager navigationManager
 
-<MudStack Class="my-4" Row="true" Justify="Justify.SpaceBetween">
-    <MudText Class="mb-4" Typo="Typo.h4">Gêneros Cadastrados</MudText>
-    <MudPagination Count="@_totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
-</MudStack>
-
-@if (_generosPorPagina is not null)
-{
-    <MudGrid>
-        @foreach (var genero in _generosPorPagina)
-        {
-            <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
-                <CardGenero generoResponse="genero" />
-            </MudItem>
-        }
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    @* Header Flexível: Título e Busca Instantânea *@
+    <MudGrid Class="mb-6 align-center">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.h4" Class="fw-bold">Gêneros</MudText>
+            <MudText Typo="Typo.subtitle1" Class="mud-text-secondary">Explore os estilos musicais cadastrados</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="6" Class="d-flex justify-sm-end">
+            <MudTextField T="string"
+                          ValueChanged="@(s => OnSearch(s))"
+                          Placeholder="Pesquisar gênero..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="mud-width-full"
+                          Style="max-width: 300px;"
+                          Immediate="true"
+                          Clearable="true"
+                          OnClearClick="ResetSearch" />
+        </MudItem>
     </MudGrid>
-}
-else
-{
-    <p><em>Carregando...</em></p>
-}
+
+    @if (_generosPorPagina is not null)
+    {
+        @if (_generosPorPagina.Any())
+        {
+            <MudGrid>
+                @foreach (var genero in _generosPorPagina)
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
+                        <CardGenero generoResponse="genero" />
+                    </MudItem>
+                }
+            </MudGrid>
+
+            @* Paginação Centralizada para melhor fluxo de leitura *@
+            <div class="d-flex justify-center mt-12 mb-8">
+                <MudPagination Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               Count="@_totalPaginas"
+                               SelectedChanged="PaginaMudou"
+                               Class="mud-text-transform-none" />
+            </div>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4 rounded-lg">
+                Nenhum gênero encontrado com esse nome.
+            </MudAlert>
+        }
+    }
+    else
+    {
+        @* Skeletons: Essencial para mascarar a latência do Azure SQL enquanto você trabalha de casa *@
+        <MudGrid>
+            @for (int i = 0; i < 6; i++)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="120px" Class="rounded-lg mb-2" />
+                    <MudSkeleton Width="70%" Height="24px" />
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</MudContainer>
+
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
     private ICollection<GeneroResponse>? _generos;
-    private int _tamanho = 8; // Quantidade de artistas que devem ser mostrados na página
+    private ICollection<GeneroResponse>? _generosFiltrados;
+    private ICollection<GeneroResponse>? _generosPorPagina;
+
+    private string _searchString = "";
+    private int _tamanho = 8;
     private int _totalItens;
     private int _totalPaginas;
-    private ICollection<GeneroResponse>? _generosPorPagina;
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,17 +93,41 @@ else
         if (_generos is not null)
         {
             _generos = _generos.OrderByDescending(a => a.Id).ToList();
-            _totalItens = _generos.Count();
-            _totalPaginas = Convert.ToInt32(Math.Ceiling((_totalItens * 1.0) / _tamanho));
-
-            this.PaginaMudou(1);
+            _generosFiltrados = _generos;
+            AtualizarPaginacao();
         }
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        if (_generos != null)
+        {
+            _generosFiltrados = _generos
+                .Where(g => g.Nome.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            AtualizarPaginacao();
+        }
+    }
+
+    private void ResetSearch()
+    {
+        _searchString = "";
+        _generosFiltrados = _generos;
+        AtualizarPaginacao();
+    }
+
+    private void AtualizarPaginacao()
+    {
+        _totalItens = _generosFiltrados?.Count() ?? 0;
+        _totalPaginas = (int)Math.Ceiling((_totalItens * 1.0) / _tamanho);
+        PaginaMudou(1);
     }
 
     private void PaginaMudou(int numeroPagina)
     {
         var indice = numeroPagina - 1;
-        _generosPorPagina = _generos!
+        _generosPorPagina = _generosFiltrados?
             .Skip(_tamanho * indice)
             .Take(_tamanho)
             .ToList();

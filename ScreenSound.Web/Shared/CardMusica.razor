@@ -1,24 +1,52 @@
-﻿<MudCard Class="mud-height-full">
-    <MudCardMedia Image="images/cardArtista.png"></MudCardMedia>
+﻿<MudCard Elevation="4" Class="mud-height-full d-flex flex-column rounded-lg hover-elevated overflow-hidden">
+    <div class="relative">
+        <MudCardMedia Image="images/cardArtista.png" Height="180" />
+        <div class="pa-2" style="position: absolute; top: 0; right: 0;">
+            <MudChip T="string" Size="Size.Small" Color="Color.Surface" Variant="Variant.Filled" Class="mud-elevation-2">
+                @Musica!.AnoLancamento
+            </MudChip>
+        </div>
+    </div>
 
-    <MudCardHeader>
-        <MudCardContent>
-            <MudText Typo="Typo.h6">@Musica!.Nome</MudText>
-        </MudCardContent>
-    </MudCardHeader>
-
-    <MudCardContent>
-        <MudText Typo="Typo.body2">Artista: @Musica!.NomeArtista</MudText>
+    <MudCardContent Class="flex-grow-1 pt-4">
+        <MudText Typo="Typo.h6" Class="fw-bold mud-text-primary mb-n1" Style="height: 32px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            @Musica!.Nome
+        </MudText>
+        
+        <div class="d-flex align-center gap-1 mt-2">
+            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Color="Color.Secondary" />
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                @Musica!.NomeArtista
+            </MudText>
+        </div>
     </MudCardContent>
 
-    <MudCardContent>
-        <MudText Typo="Typo.body2">Ano do lançamento: @Musica.AnoLancamento</MudText>
-    </MudCardContent>
-
-    <MudCardActions>
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="@($"/editar-musica/{Musica!.Nome}")">Ver detalhes</MudButton>
+    <MudCardActions Class="pb-4 px-4 mt-auto">
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Primary" 
+                   FullWidth="true" 
+                   Href="@($"/editar-musica/{Musica!.Nome}")"
+                   Class="rounded-pill mud-text-transform-none py-2"
+                   StartIcon="@Icons.Material.Filled.LibraryMusic">
+            Ver detalhes
+        </MudButton>
     </MudCardActions>
 </MudCard>
+
+<style>
+    .hover-elevated {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    
+    .hover-elevated:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+    }
+
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
     [Parameter]

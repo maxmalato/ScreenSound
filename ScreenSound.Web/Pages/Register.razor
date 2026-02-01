@@ -6,32 +6,56 @@
 
 @attribute [AllowAnonymous]
 
-<MudPaper Class="px-8 pt-2 pb-4 mx-16 my-8" Justify="Justify.Center">
-    <MudText Typo="Typo.h4" Class="mb-4">Criar nova conta</MudText>
-    <MudForm>
-        <MudTextField T="string" Label="E-mail" @bind-Value="email"
-                      Variant="Variant.Outlined" Class="my-4"
-                      Required="true" RequiredError="E-mail é obrigatório!" />
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center justify-center" Style="min-height: 80vh;">
+    
+    <MudPaper Class="pa-8 mud-width-full mud-elevation-4 rounded-lg">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-8 fw-bold">Criar conta</MudText>
+        
+        <MudForm>
+            <MudTextField T="string" Label="E-mail" @bind-Value="email"
+                          Variant="Variant.Outlined" 
+                          Class="mb-4"
+                          Required="true" RequiredError="E-mail é obrigatório!"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email"/>
 
-        <MudTextField T="string" Label="Senha" @bind-Value="senha"
-                      InputType="InputType.Password"
-                      Variant="Variant.Outlined" Class="my-4"
-                      Required="true" RequiredError="Senha é obrigatória!" />
+            <MudTextField T="string" Label="Senha" 
+                          @bind-Value="senha"
+                          InputType="@(_exibirSenha ? InputType.Text : InputType.Password)"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@(_exibirSenha ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                          OnAdornmentClick="@(() => _exibirSenha = !_exibirSenha)"
+                          Variant="Variant.Outlined" 
+                          Class="mb-2"
+                          Required="true" RequiredError="Senha é obrigatória!" />
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-6"
-                   @onclick="RealizarCadastro" StartIcon="@Icons.Material.Filled.PersonAdd">
-            Cadastrar
-        </MudButton>
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       FullWidth="true"
+                       Class="py-3 mt-6 rounded-pill mud-text-transform-none" 
+                       @onclick="RealizarCadastro"
+                       StartIcon="@Icons.Material.Filled.PersonAdd">
+                <MudText Class="mud-text-transform-none">Cadastrar</MudText>
+            </MudButton>
 
-        <MudButton Variant="Variant.Text" Color="Color.Secondary" href="/login">
-            Já tenho uma conta
-        </MudButton>
-    </MudForm>
-</MudPaper>
+            <div class="d-flex justify-center mt-6">
+                <MudLink href="/login" Color="Color.Secondary" Underline="Underline.Hover" Class="mud-text-transform-none">
+                    Já tenho uma conta
+                </MudLink>
+            </div>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
+
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
     private string? email;
     private string? senha;
+    private bool _exibirSenha = false;
 
     private async Task RealizarCadastro()
     {

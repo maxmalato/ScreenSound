@@ -2,64 +2,122 @@
 
 @inject ArtistaAPI ArtistaApi
 @inject NavigationManager NavigationManager
+@inject ISnackbar ISnackbar
 
-<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
-    <MudText Class="mt-8" Typo="Typo.h4">Edição de Artista</MudText>
-
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-10 mb-10">
     @if (Artista is not null)
     {
-    <MudForm>
-        <MudTextField Class="mt-4" T="string" Placeholder="Nome do Artista"
-                      @bind-Value="_nome"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      RequiredError="Campo obrigatório."
-                      Disabled="@(_isEditing)"
-                      />
+        <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+            <div class="d-flex align-center mb-8">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" Href="/artistas" Class="mr-4" />
+                <div>
+                    <MudText Typo="Typo.h4" Class="fw-bold">@(_isEditing ? "Detalhes do Artista" : "Editando Perfil")</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Gerencie as informações e a classificação</MudText>
+                </div>
+            </div>
 
-                      <MudTextField Class="mt-4" T="string" Placeholder="Biografia do artista"
-                                    @bind-Value="_biografia"
-                                    Variant="Variant.Outlined"
-                                    Lines="4"
-                                    Required="true"
-                                    RequiredError="Campo obrigatório."
-                                    Disabled="@(_isEditing)"
-                      />
-                      
-        <MudRating @bind-SelectedValue="_classificacao" Disabled="@(_isEditing)"/>
+            <MudForm>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="Nome do Artista"
+                                      @bind-Value="_nome"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="O nome é obrigatório."
+                                      Disabled="@(_isEditing)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Badge" />
+                    </MudItem>
 
-        <div class="d-flex align-center justify-content-end gap-3 mt-4">
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/artistas">
-                Voltar
-            </MudButton>
-            
-            @if (!_isEditing)
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="CancelarEdicao">
-                    Cancelar
-                </MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Success" @onclick="Salvar">
-                    Salvar
-                </MudButton>
-            }
-            else
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="HabilitarEdicao">
-                    Editar
-                </MudButton>
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="Biografia"
+                                      @bind-Value="_biografia"
+                                      Variant="Variant.Outlined"
+                                      Lines="5"
+                                      Required="true"
+                                      RequiredError="A biografia é obrigatória."
+                                      Disabled="@(_isEditing)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Description" />
+                    </MudItem>
 
-                <MudButton Variant="Variant.Filled" Color="Color.Error" @onclick="Excluir">
-                    Excluir
-                </MudButton>
-            }
-        </div>
-    </MudForm>
+                    <MudItem xs="12" Class="d-flex flex-column align-center py-6">
+                        <MudText Typo="Typo.h6" Class="mb-2">Sua Avaliação</MudText>
+                        <MudRating @bind-SelectedValue="_classificacao" 
+                                   Disabled="@(_isEditing)" 
+                                   Size="Size.Large" 
+                                   Color="Color.Warning" />
+                        <MudText Typo="Typo.caption" Class="mt-2">
+                            @(_classificacao > 0 ? $"Você deu nota {_classificacao}" : "Clique nas estrelas para avaliar")
+                        </MudText>
+                    </MudItem>
+
+                    <MudItem xs="12" Class="d-flex flex-column flex-sm-row justify-end gap-3 mt-4">
+                        @if (_isEditing)
+                        {
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       @onclick="HabilitarEdicao"
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       Class="rounded-pill px-8 mud-text-transform-none">
+                                Editar Perfil
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Error" 
+                                       @onclick="ConfirmarExclusao"
+                                       StartIcon="@Icons.Material.Filled.Delete"
+                                       Class="rounded-pill px-8 mud-text-transform-none">
+                                Excluir Artista
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Text" 
+                                       Color="Color.Secondary" 
+                                       @onclick="CancelarEdicao"
+                                       Class="mud-text-transform-none">
+                                Cancelar
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Success" 
+                                       @onclick="Salvar"
+                                       Disabled="_processando"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       Class="rounded-pill px-10 mud-text-transform-none">
+                                @if (_processando)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                    <span>Salvando...</span>
+                                }
+                                else
+                                {
+                                    <span>Salvar Alterações</span>
+                                }
+                            </MudButton>
+                        }
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudPaper>
     }
     else
     {
-        <MudText>Carregando artista...</MudText>       
+        <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="50px" Width="40%" Class="mb-6" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="60px" Class="mb-4" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="150px" Class="mb-4" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="80px" Width="30%" Class="mx-auto" />
+        </MudPaper>
     }
-</MudPaper>
+</MudContainer>
+
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
     [Parameter] public string? NomeArtista { get; set; }
@@ -69,53 +127,79 @@
     private string? _biografia;
     private string? _fotoPerfil;
     private bool _isEditing = true;
+    private bool _processando = false;
     private int _classificacao;
+    private int _classificacaoOriginal;
 
-    // Carrega os dados do artista ao inicializar o componente
     protected override async Task OnInitializedAsync()
     {
-        Artista = await ArtistaApi.GetArtistaPorNomeAsync(NomeArtista!);
+        try 
+        {
+            Artista = await ArtistaApi.GetArtistaPorNomeAsync(NomeArtista!);
 
-        _nome = Artista!.Nome;
-        _biografia = Artista!.Bio;
-        var avaliacaoResponse = await ArtistaApi.GetAvaliacaoDaPessoaLogadaAsync(Artista.Id);
-        _classificacao = (int)Math.Round(avaliacaoResponse?.Nota ?? 0);
+            if (Artista is not null)
+            {
+                _nome = Artista.Nome;
+                _biografia = Artista.Bio;
+                var avaliacaoResponse = await ArtistaApi.GetAvaliacaoDaPessoaLogadaAsync(Artista.Id);
+                _classificacao = (int)Math.Round(avaliacaoResponse?.Nota ?? 0);
+                _classificacaoOriginal = _classificacao;
+            }
+        }
+        catch (Exception ex)
+        {
+            ISnackbar.Add("Erro ao carregar dados do Azure.", Severity.Error);
+        }
     }
 
-    // Alterar o nome dos botões quando o usuário clica em "Editar"
-    private void HabilitarEdicao()
-    {
-        _isEditing = false;
-    }
+    private void HabilitarEdicao() => _isEditing = false;
 
-    // Cancela a edição e restaura os dados antigos
     private void CancelarEdicao()
     {
         _isEditing = true;
         _nome = Artista!.Nome;
         _biografia = Artista!.Bio;
-
-        _classificacao = Artista.Classificacao is double c ? (int)Math.Round(c) : 0;
+        _classificacao = _classificacaoOriginal;
     }
 
-    // Edita e salva as alterações do artista
     private async Task Salvar()
     {
-        if (Artista is not null)
+        _processando = true;
+        try
         {
             var requestEdit = new ArtistaRequestEdit(Artista!.Id, _nome!, _biografia!, _fotoPerfil);
             await ArtistaApi.UpdateArtistaAsync(requestEdit);
-
             await ArtistaApi.AvaliarArtistaAsync(Artista.Id, _classificacao);
             
+            ISnackbar.Add("Perfil atualizado com sucesso!", Severity.Success);
             NavigationManager.NavigateTo("/artistas");
+        }
+        catch (Exception ex)
+        {
+            ISnackbar.Add("Erro ao salvar alterações.", Severity.Error);
+        }
+        finally
+        {
+            _processando = false;
         }
     }
 
-    // Exclui o artista e navega de volta para a lista de artistas
+    private async Task ConfirmarExclusao()
+    {
+        await Excluir();
+    }
+
     private async Task Excluir()
     {
-        await ArtistaApi.DeleteArtistaAsync(Artista!.Id);
-        NavigationManager.NavigateTo("/artistas");
+        try 
+        {
+            await ArtistaApi.DeleteArtistaAsync(Artista!.Id);
+            ISnackbar.Add("Artista removido do catálogo.", Severity.Info);
+            NavigationManager.NavigateTo("/artistas");
+        }
+        catch 
+        {
+            ISnackbar.Add("Erro ao excluir artista.", Severity.Error);
+        }
     }
-};
+}

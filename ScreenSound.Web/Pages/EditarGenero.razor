@@ -2,86 +2,146 @@
 
 @inject GeneroAPI generoAPI
 @inject NavigationManager NavigationManager
+@inject ISnackbar ISnackbar
 
-<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
-    <MudText Class="mt-8" Typo="Typo.h4">Edição de Gêneros</MudText>
-
-    @if (generoAPI is not null)
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10 mb-10">
+    @if (Genero is not null)
     {
-        <MudForm>
-            <MudTextField Class="mt-4" T="string" Placeholder="Nome do gênero"
-                          @bind-Value="_nome"
-                          Variant="Variant.Outlined"
-                          Required="true"
-                          RequiredError="Campo obrigatório."
-                          Disabled="@(_isEditing)" />
-
-            <MudTextField Class="mt-4" T="string" Placeholder="Descrição do gênero"
-                          @bind-Value="_descricao"
-                          Variant="Variant.Outlined"
-                          Lines="4"
-                          Required="true"
-                          RequiredError="Campo obrigatório."
-                          Disabled="@(_isEditing)" />
-
-            <div class="d-flex align-center justify-content-end gap-3 mt-4">
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="/generos">
-                    Voltar
-                </MudButton>
-
-                @if (!_isEditing)
-                {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="CancelarEdicao">
-                        Cancelar
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" @onclick="Salvar">
-                        Salvar
-                    </MudButton>
-                }
-                else
-                {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="HabilitarEdicao">
-                        Editar
-                    </MudButton>
-
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" @onclick="Excluir">
-                        Excluir
-                    </MudButton>
-                }
+        <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+            <div class="d-flex align-center mb-8">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" Href="/generos" Class="mr-4" />
+                <div>
+                    <MudText Typo="Typo.h4" Class="fw-bold">@(_isEditing ? "Detalhes do Gênero" : "Editar Gênero")</MudText>
+                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Ajuste o nome e a descrição do estilo musical</MudText>
+                </div>
             </div>
-        </MudForm>
+
+            <MudForm @ref="_form" @bind-IsValid="@_success">
+                <MudGrid Spacing="3">
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="Nome do Gênero"
+                                      @bind-Value="_nome"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="O nome é obrigatório."
+                                      Disabled="@(_isEditing)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Label" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="Descrição do Estilo"
+                                      @bind-Value="_descricao"
+                                      Variant="Variant.Outlined"
+                                      Lines="4"
+                                      Required="true"
+                                      RequiredError="A descrição é obrigatória."
+                                      Disabled="@(_isEditing)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Description" />
+                    </MudItem>
+
+                    <MudItem xs="12" Class="d-flex flex-column flex-sm-row justify-end gap-3 mt-6">
+                        @if (_isEditing)
+                        {
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       @onclick="HabilitarEdicao"
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       Class="rounded-pill px-8 mud-text-transform-none">
+                                Editar Informações
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Error" 
+                                       @onclick="Excluir"
+                                       StartIcon="@Icons.Material.Filled.Delete"
+                                       Class="rounded-pill px-8 mud-text-transform-none">
+                                Excluir
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Text" 
+                                       Color="Color.Secondary" 
+                                       @onclick="CancelarEdicao"
+                                       Class="mud-text-transform-none px-6">
+                                Cancelar
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Success" 
+                                       @onclick="Salvar"
+                                       Disabled="_processando"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       Class="rounded-pill px-10 mud-text-transform-none">
+                                @if (_processando)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                    <span>Salvando...</span>
+                                }
+                                else
+                                {
+                                    <span>Salvar Alterações</span>
+                                }
+                            </MudButton>
+                        }
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudPaper>
     }
     else
     {
-        <MudText>Carregando gênero...</MudText>
+        <MudPaper Class="pa-8 mud-elevation-4 rounded-lg">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="40px" Width="50%" Class="mb-6" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="56px" Class="mb-4" />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="120px" Class="mb-6" />
+            <div class="d-flex justify-end gap-3">
+                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="40px" Width="100px" Class="rounded-pill" />
+                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="40px" Width="100px" Class="rounded-pill" />
+            </div>
+        </MudPaper>
     }
-</MudPaper>
+</MudContainer>
+
+<style>
+    .mud-text-transform-none {
+        text-transform: none !important;
+    }
+</style>
 
 @code {
-    [Parameter]
-    public string? NomeGenero { get; set; }
+    [Parameter] public string? NomeGenero { get; set; }
     public GeneroResponse? Genero { get; set; }
+
+    private MudForm _form = null!;
+    private bool _success;
+    private bool _isEditing = true;
+    private bool _processando = false;
 
     private string? _nome;
     private string? _descricao;
-    private bool _isEditing = true;
 
-    // Carrega os dados de gênero ao inicializar o componente
     protected override async Task OnInitializedAsync()
     {
-        Genero = await generoAPI.GetGeneroPorNomeAsync(NomeGenero!);
-
-        _nome = Genero!.Nome;
-        _descricao = Genero!.Descricao;
+        try 
+        {
+            Genero = await generoAPI.GetGeneroPorNomeAsync(NomeGenero!);
+            if (Genero is not null)
+            {
+                _nome = Genero.Nome;
+                _descricao = Genero.Descricao;
+            }
+        }
+        catch (Exception)
+        {
+            ISnackbar.Add("Erro ao conectar com o banco de dados.", Severity.Error);
+        }
     }
 
-    // Alterar o nome dos botões quando o usuário clica em "Editar"
-    private void HabilitarEdicao()
-    {
-        _isEditing = false;
-    }
+    private void HabilitarEdicao() => _isEditing = false;
 
-    // Cancela a edição e restaura os dados antigos
     private void CancelarEdicao()
     {
         _isEditing = true;
@@ -89,23 +149,42 @@
         _descricao = Genero!.Descricao;
     }
 
-    // Edita e salva as alterações do artista
     private async Task Salvar()
     {
-        if (Genero is not null)
+        await _form.Validate();
+        if (_form.IsValid && Genero is not null)
         {
-            var requestEdit = new GeneroRequestEdit(Genero!.Id, _nome!, _descricao!);
-
-            await generoAPI.UpdateGeneroAsync(requestEdit);
-
-            NavigationManager.NavigateTo("/generos");
+            _processando = true;
+            try
+            {
+                var requestEdit = new GeneroRequestEdit(Genero.Id, _nome!, _descricao!);
+                await generoAPI.UpdateGeneroAsync(requestEdit);
+                
+                ISnackbar.Add("Gênero atualizado com sucesso!", Severity.Success);
+                NavigationManager.NavigateTo("/generos");
+            }
+            catch (Exception ex)
+            {
+                ISnackbar.Add($"Erro ao salvar alterações: {ex.Message}", Severity.Error);
+            }
+            finally
+            {
+                _processando = false;
+            }
         }
     }
 
-    // Exclui o artista e navega de volta para a lista de artistas
     private async Task Excluir()
     {
-        await generoAPI.DeleteGeneroAsync(Genero!.Id);
-        NavigationManager.NavigateTo("/generos");
+        try 
+        {
+            await generoAPI.DeleteGeneroAsync(Genero!.Id);
+            ISnackbar.Add("Gênero removido do sistema.", Severity.Info);
+            NavigationManager.NavigateTo("/generos");
+        }
+        catch (Exception)
+        {
+            ISnackbar.Add("Erro ao excluir. Verifique se existem músicas vinculadas.", Severity.Error);
+        }
     }
 }
