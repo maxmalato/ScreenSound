@@ -1,7 +1,5 @@
 ﻿<MudCard Elevation="3" Class="mud-height-full d-flex flex-row rounded-lg hover-elevated overflow-hidden">
-    
     <div class="mud-theme-primary" style="width: 6px;"></div>
-
     <div class="d-flex flex-column flex-grow-1">
         <MudCardHeader Class="pb-0">
             <CardHeaderContent>
@@ -14,11 +12,14 @@
         </MudCardHeader>
 
         <MudCardContent Class="flex-grow-1 pt-2">
-            <MudText Typo="Typo.body2" 
-                     Class="mud-text-secondary" 
-                     Style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                @generoResponse?.Descricao
-            </MudText>
+            @* O Tooltip resolve o problema de o usuário não conseguir ler o texto todo *@
+            <MudTooltip Text="@generoResponse?.Descricao" Placement="Placement.Top" Arrow="true">
+                <MudText Typo="Typo.body2" 
+                         Class="mud-text-secondary" 
+                         Style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.5em; max-height: 4.5em;">
+                    @generoResponse?.Descricao
+                </MudText>
+            </MudTooltip>
         </MudCardContent>
 
         <MudCardActions Class="pb-4 px-4 mt-auto">
@@ -33,7 +34,6 @@
         </MudCardActions>
     </div>
 </MudCard>
-
 <style>
     .hover-elevated {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;

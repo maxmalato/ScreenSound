@@ -38,6 +38,7 @@
                                    Variant="Variant.Outlined" 
                                    Disabled="@(_isEditing)"
                                    AnchorOrigin="Origin.BottomCenter"
+                                   TransformOrigin="Origin.TopCenter"
                                    AdornmentIcon="@Icons.Material.Filled.Person">
                             @if (_artistas is not null)
                             {
@@ -64,6 +65,7 @@
                                    Variant="Variant.Outlined" 
                                    Disabled="@(_isEditing)"
                                    AnchorOrigin="Origin.BottomCenter"
+                                   TransformOrigin="Origin.TopCenter"
                                    ValueChanged="GeneroSelecionado"
                                    AdornmentIcon="@Icons.Material.Filled.Label">
                             @if (_generos is not null)
