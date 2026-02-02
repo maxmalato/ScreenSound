@@ -64,7 +64,7 @@ public static class MusicasExtensions
             return Results.NoContent();
         });
 
-        groupBuilderMusicas.MapPut("", ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequestEdit musicaRequestEdit) =>
+        groupBuilderMusicas.MapPut("", ([FromServices] DAL<Musica> dal, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaRequestEdit musicaRequestEdit) =>
         {
             var musicaAAtualizar = dal.RecuperarPor(a => a.Id == musicaRequestEdit.Id);
             if (musicaAAtualizar is null)
@@ -75,6 +75,11 @@ public static class MusicasExtensions
             musicaAAtualizar.AnoLancamento = musicaRequestEdit.AnoLancamento;
             musicaAAtualizar.ArtistaId = musicaRequestEdit.ArtistaId;
 
+            if (musicaRequestEdit.Generos is not null)
+            {
+                musicaAAtualizar.Generos = GeneroRequestConverter(musicaRequestEdit.Generos, dalGenero);    
+            }
+            
             dal.Atualizar(musicaAAtualizar);
             return Results.Ok();
         });
@@ -123,11 +128,15 @@ public static class MusicasExtensions
 
     private static MusicaResponse EntityToResponse(Musica musica)
     {
+        var generoResponse = musica.Generos?
+            .Select(g => new GeneroResponse(g.Id, g.Nome, g.Descricao))
+            .ToList();
+        
         if (musica.Artista is null)
         {
-            return new MusicaResponse(musica.Id, musica.Nome, 0, "Artista não cadastrado", 0);
+            return new MusicaResponse(musica.Id, musica.Nome, 0, "Artista não cadastrado", 0, generoResponse);
         }
 
-        return new MusicaResponse(musica.Id, musica.Nome, musica.Artista.Id, musica.Artista.Nome, musica.AnoLancamento);
+        return new MusicaResponse(musica.Id, musica.Nome, musica.Artista.Id, musica.Artista.Nome, musica.AnoLancamento, generoResponse);
     }
 }

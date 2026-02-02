@@ -180,22 +180,27 @@
 
     protected override async Task OnInitializedAsync()
     {
-        try 
+        try
         {
             MusicaResponse = await musicaAPI.GetMusicaPorNomeAsync(NomeMusica!);
-            _artistas = await artistaAPI.GetArtistasAsync();
-            _generos = await generoAPI.GetGenerosAsync();
 
             if (MusicaResponse is not null)
             {
                 _nome = MusicaResponse.Nome;
                 _anoLancamento = MusicaResponse.AnoLancamento;
 
+                if (MusicaResponse.Generos is not null)
+                {
+                    GenerosSelecionados = MusicaResponse.Generos.ToList();
+                }
+
+                _artistas = await artistaAPI.GetArtistasAsync();
+                _generos = await generoAPI.GetGenerosAsync();
+
                 if (_artistas is not null)
                 {
                     ArtistaDaMusica = _artistas.FirstOrDefault(a => a.Id == MusicaResponse.ArtistaId);
                 }
-                
             }
         }
         catch (Exception ex)
@@ -234,7 +239,12 @@
         _processando = true;
         try
         {
-            var requestEdit = new MusicaRequestEdit(MusicaResponse!.Id, _nome!, ArtistaDaMusica.Id, _anoLancamento);
+            var generoRequests = GenerosSelecionados
+                .Select(g => new GeneroRequest(g.Nome, g.Descricao))
+                .ToList();
+            
+            var requestEdit = new MusicaRequestEdit(MusicaResponse!.Id, _nome!, ArtistaDaMusica.Id, _anoLancamento, generoRequests);
+            
             await musicaAPI.UpdateMusicaAsync(requestEdit);
 
             ISnackbar.Add("Música atualizada com sucesso!", Severity.Success);
