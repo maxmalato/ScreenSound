@@ -77,7 +77,13 @@ public static class MusicasExtensions
 
             if (musicaRequestEdit.Generos is not null)
             {
-                musicaAAtualizar.Generos = GeneroRequestConverter(musicaRequestEdit.Generos, dalGenero);    
+                musicaAAtualizar.Generos.Clear();
+
+                var generosAtualizados = GeneroRequestConverter(musicaRequestEdit.Generos, dalGenero);
+                foreach (var genero in generosAtualizados)
+                {
+                    musicaAAtualizar.Generos.Add(genero);
+                }
             }
             
             dal.Atualizar(musicaAAtualizar);
