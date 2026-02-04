@@ -46,9 +46,21 @@ public static class MusicasExtensions
             {
                 ArtistaId = musicaRequest.ArtistaId,
                 AnoLancamento = musicaRequest.AnoLancamento,
-                Generos = musicaRequest.Generos is not null ? GeneroRequestConverter(musicaRequest.Generos, dalGenero) :
-                new List<Genero>()
+                Generos = new List<Genero>()
             };
+
+            if (musicaRequest.GenerosId is not null)
+            {
+                foreach (var id in musicaRequest.GenerosId)
+                {
+                    var genero = dalGenero.RecuperarPor(g => g.Id == id);
+                    if (genero is not null)
+                    {
+                        musica.Generos.Add(genero);
+                    }
+                }
+            }
+            
             dal.Adicionar(musica);
             return Results.Ok();
         });
@@ -75,14 +87,17 @@ public static class MusicasExtensions
             musicaAAtualizar.AnoLancamento = musicaRequestEdit.AnoLancamento;
             musicaAAtualizar.ArtistaId = musicaRequestEdit.ArtistaId;
 
-            if (musicaRequestEdit.Generos is not null)
+            if (musicaRequestEdit.GenerosId is not null)
             {
                 musicaAAtualizar.Generos.Clear();
 
-                var generosAtualizados = GeneroRequestConverter(musicaRequestEdit.Generos, dalGenero);
-                foreach (var genero in generosAtualizados)
+                foreach (var id in musicaRequestEdit.GenerosId)
                 {
-                    musicaAAtualizar.Generos.Add(genero);
+                    var genero = dalGenero.RecuperarPor(g => g.Id == id);
+                    if (genero is not null)
+                    {
+                        musicaAAtualizar.Generos.Add(genero);
+                    }
                 }
             }
             
@@ -135,7 +150,7 @@ public static class MusicasExtensions
     private static MusicaResponse EntityToResponse(Musica musica)
     {
         var generoResponse = musica.Generos?
-            .Select(g => new GeneroResponse(g.Id, g.Nome, g.Descricao))
+            .Select(g => new GeneroResponse(g.Id, g.Nome, ""))
             .ToList();
         
         if (musica.Artista is null)
