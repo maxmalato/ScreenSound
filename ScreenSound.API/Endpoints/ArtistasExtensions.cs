@@ -39,6 +39,12 @@ public static class ArtistasExtensions
             return Results.Ok(EntityToResponse(artista));
         });
 
+        groupBuilderArtistas.MapGet("{id}/possui-musicas", ([FromServices] DAL<Musica> dalMusica, int id) =>
+        {
+            var possui = dalMusica.Listar(m => m.ArtistaId == id).Any();
+            return Results.Ok(possui);
+        });
+
         groupBuilderArtistas.MapPost("",
             async ([FromServices] IHostEnvironment env, [FromServices] DAL<Artista> dal,
                 [FromBody] ArtistaRequest artistaRequest) =>
@@ -72,15 +78,21 @@ public static class ArtistasExtensions
                 return Results.Ok();
             });
 
-        groupBuilderArtistas.MapDelete("{id}", ([FromServices] DAL<Artista> dal, int id) =>
+        groupBuilderArtistas.MapDelete("{id}", ([FromServices] DAL<Artista> dalArtista, [FromServices] DAL<Musica> dalMusica, int id) =>
         {
-            var artista = dal.RecuperarPor(a => a.Id == id);
+            var artista = dalArtista.RecuperarPor(a => a.Id == id);
             if (artista is null)
             {
                 return Results.NotFound();
             }
 
-            dal.Deletar(artista);
+            var temMusicas = dalMusica.Listar(m => m.ArtistaId == id).Any();
+            if(temMusicas)
+            {
+                return Results.Conflict(new { message = "Não é possível remover artista com músicas associadas." });
+            }
+
+            dalArtista.Deletar(artista);
             return Results.NoContent();
         });
 

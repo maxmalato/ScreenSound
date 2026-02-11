@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using ScreenSound.Modelos;
+using System.Linq.Expressions;
 
 namespace ScreenSound.Banco;
 
@@ -35,6 +36,15 @@ public class DAL<T> where T : class
 
     public void Deletar(T objeto)
     {
+        if(objeto is Artista artista)
+        {
+            var temMusicas = context.Musicas.Any(m => m.ArtistaId == artista.Id);
+
+            if(temMusicas)
+            {
+                throw new InvalidOperationException("Não é possível deletar um artista que possui músicas associadas.");
+            }
+        }
         context.Set<T>().Remove(objeto);
         context.SaveChanges();
     }
