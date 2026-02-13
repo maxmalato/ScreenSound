@@ -34,7 +34,19 @@ public class ArtistaAPI
     // Excluir artista por nome
     public async Task DeleteArtistaAsync(int id)
     {
-        await _httpClient.DeleteAsync($"artistas/{id}");
+        var response = await _httpClient.DeleteAsync($"artistas/{id}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode ==  System.Net.HttpStatusCode.Conflict)
+            {
+                var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                
+                throw new Exception(error?.Message);
+            }
+        }
+        
+        response.EnsureSuccessStatusCode();
     }
 
     // Puxar os dados do artista por nome

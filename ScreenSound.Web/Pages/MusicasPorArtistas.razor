@@ -1,5 +1,4 @@
 ﻿@page "/musicas-por-artista"
-@using Microsoft.AspNetCore.Authorization
 @inject MusicaAPI musicaAPI
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
@@ -19,6 +18,7 @@
                           Class="mud-width-full"
                           Style="max-width: 350px;"
                           Immediate="true"
+                          DebounceInterval="300"
                           Clearable="true"
                           OnClearClick="ResetSearch" />
         </MudItem>
@@ -48,14 +48,14 @@
         else
         {
             <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4 rounded-lg">
-                Nenhuma música encontrada com esse critério.
+                Nenhuma música encontrada para "@_searchString".
             </MudAlert>
         }
     }
     else
     {
         <MudGrid>
-            @for (int i = 0; i < 8; i++)
+            @for (int i = 0; i < _tamanho; i++)
             {
                 <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
                     <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" Class="rounded-lg mb-2" />
@@ -85,11 +85,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _musicas = await musicaAPI.GetMusicasAsync();
+        var musicasResultado = await musicaAPI.GetMusicasAsync();
 
-        if (_musicas is not null)
+        if (musicasResultado is not null)
         {
-            _musicas = _musicas.OrderByDescending(m => m.Id).ToList();
+            _musicas = musicasResultado.OrderByDescending(m => m.Id).ToList();
             _musicasFiltradas = _musicas;
             AtualizarPaginacao();
         }
@@ -98,27 +98,28 @@
     private void OnSearch(string text)
     {
         _searchString = text;
-        if (_musicas != null)
+        
+        if (string.IsNullOrWhiteSpace(_searchString))
         {
-            _musicasFiltradas = _musicas
-                .Where(m => m.Nome.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            AtualizarPaginacao();
+            _musicasFiltradas = _musicas;
         }
-    }
+        else
+        {
+            _musicasFiltradas = _musicas?
+                .Where(x => x.Nome.Contains(_searchString, StringComparison.OrdinalIgnoreCase) 
+                         || x.NomeArtista.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
-    private void ResetSearch()
-    {
-        _searchString = "";
-        _musicasFiltradas = _musicas;
         AtualizarPaginacao();
     }
 
     private void AtualizarPaginacao()
     {
-        _totalItens = _musicasFiltradas?.Count() ?? 0;
+        _totalItens = _musicasFiltradas?.Count ?? 0;
         _totalPaginas = (int)Math.Ceiling((_totalItens * 1.0) / _tamanho);
-        PaginaMudou(1);
+        
+        PaginaMudou(1); 
     }
 
     private void PaginaMudou(int numeroPagina)

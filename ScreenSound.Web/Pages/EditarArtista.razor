@@ -197,9 +197,9 @@
             ISnackbar.Add("Artista removido do catálogo.", Severity.Info);
             NavigationManager.NavigateTo("/artistas");
         }
-        catch 
+        catch (Exception ex)
         {
-            ISnackbar.Add("Erro ao excluir artista.", Severity.Error);
+            ISnackbar.Add(ex.Message, Severity.Error);
         }
     }
 }

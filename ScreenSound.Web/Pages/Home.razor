@@ -1,9 +1,138 @@
 ﻿@page "/"
+@inject ArtistaAPI ArtistaApi
+@inject MusicaAPI MusicaApi
 
-@attribute [AllowAnonymous]
+<PageTitle>ScreenSound | Home</PageTitle>
 
-<PageTitle>Home</PageTitle>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8 mb-16">
+    
+    @* --- HERO SECTION --- *@
+    <MudPaper Elevation="0" Class="pa-12 mb-12 rounded-xl d-flex flex-column align-center justify-center mud-theme-primary" 
+              Style="background: linear-gradient(135deg, var(--mud-palette-primary) 0%, var(--mud-palette-secondary) 100%); color: white; min-height: 300px;">
+        <MudIcon Icon="@Icons.Material.Filled.LibraryMusic" Size="Size.Large" Class="mb-4" Style="width: 80px; height: 80px;" />
+        <MudText Typo="Typo.h2" Class="fw-bold mb-2 text-center">Bem-vindo ao ScreenSound</MudText>
+        <MudText Typo="Typo.h5" Class="mb-8 text-center" Style="opacity: 0.9;">O seu catálogo de música favorito, reinventado.</MudText>
+        <div class="d-flex gap-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Surface" Size="Size.Large" Class="rounded-pill px-8 fw-bold" Style="color: var(--mud-palette-primary);" Href="/artistas">
+                Explorar Artistas
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Surface" Size="Size.Large" Class="rounded-pill px-8" Href="/musicas-por-artista">
+                Ver Músicas
+            </MudButton>
+        </div>
+    </MudPaper>
 
-<section class="p-4">
-    <h1 class="text-center">Bem vindo ao ScreenSound!</h1>
-</section>
+    @* --- ESTATÍSTICAS E CARROSSEL --- *@
+    <MudGrid Class="align-stretch">
+        
+        @* Coluna da Esquerda: Números do Sistema *@
+        <MudItem xs="12" md="4">
+            <MudStack Spacing="4" Class="h-100">
+                <MudPaper Class="pa-6 rounded-xl mud-height-full d-flex flex-column justify-center align-center hover-scale">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Primary" Size="Size.Large" />
+                    <MudText Typo="Typo.h3" Class="fw-bold mt-2">@(_artistas?.Count ?? 0)</MudText>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary">Artistas Cadastrados</MudText>
+                </MudPaper>
+                
+                <MudPaper Class="pa-6 rounded-xl mud-height-full d-flex flex-column justify-center align-center hover-scale">
+                    <MudIcon Icon="@Icons.Material.Filled.MusicNote" Color="Color.Secondary" Size="Size.Large" />
+                    <MudText Typo="Typo.h3" Class="fw-bold mt-2">@(_musicas?.Count ?? 0)</MudText>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary">Músicas no Catálogo</MudText>
+                </MudPaper>
+            </MudStack>
+        </MudItem>
+
+        @* Coluna da Direita: Carrossel de Destaques *@
+        @* --- CARROSSEL COM CORREÇÃO NA IMAGEM DE PERFIL --- *@
+<MudItem xs="12" md="8">
+    <MudPaper Class="rounded-xl overflow-hidden" Elevation="4">
+        <MudCarousel Class="mud-width-full" Style="height:500px;" ShowArrows="true" ShowBullets="true" AutoCycle="true" TData="object">
+            @if (_artistasDestaque is not null && _artistasDestaque.Any())
+            {
+                @foreach (var artista in _artistasDestaque)
+                {
+                    <MudCarouselItem Transition="Transition.Slide" Color="@Color.Dark">
+                        <div class="d-flex flex-column align-center justify-center h-100 relative">
+                            @* Imagem de Fundo com Blur (Permanece igual) *@
+                            <div style="background-image: url('@ObterImagem(artista)'); background-size: cover; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: blur(8px); opacity: 0.6;"></div>
+                            
+                            @* Conteúdo do Slide *@
+                            <div class="z-10 d-flex flex-column align-center pa-4">
+                                
+                                @* CORREÇÃO AQUI: Trocamos MudAvatar por MudImage *@
+                                <MudImage Src="@ObterImagem(artista)"
+                                          Alt="@artista.Nome"
+                                          Height="150"
+                                          Width="150"
+                                          ObjectFit="ObjectFit.Cover"
+                                          Class="mb-4 mud-elevation-10 rounded-circle" />
+
+                                <MudText Typo="Typo.h4" Class="fw-bold text-white shadow-text">@artista.Nome</MudText>
+                                <MudRating ReadOnly="true" SelectedValue="@((int)Math.Round(artista.Classificacao ?? 0))" Color="Color.Warning" Class="mt-2" />
+                                <MudText Typo="Typo.body1" Class="text-white mt-2 text-center" Style="max-width: 600px;">
+                                    @(artista.Bio.Length > 100 ? artista.Bio.Substring(0, 100) + "..." : artista.Bio)
+                                </MudText>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4 rounded-pill" Href="@($"/editar-artista/{artista.Nome}")">Ver Perfil</MudButton>
+                            </div>
+                        </div>
+                    </MudCarouselItem>
+                }
+            }
+            else
+            {
+                <MudCarouselItem Transition="Transition.Fade" Color="@Color.Dark">
+                    <div class="d-flex align-center justify-center h-100">
+                        <MudText Typo="Typo.h5">Carregando destaques...</MudText>
+                    </div>
+                </MudCarouselItem>
+            }
+        </MudCarousel>
+    </MudPaper>
+</MudItem>
+    </MudGrid>
+
+</MudContainer>
+
+<style>
+    .hover-scale {
+        transition: transform 0.3s ease;
+    }
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+    .shadow-text {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+    .z-10 {
+        z-index: 10;
+    }
+</style>
+
+@code {
+    private ICollection<ArtistaResponse>? _artistas;
+    private ICollection<MusicaResponse>? _musicas;
+    private List<ArtistaResponse>? _artistasDestaque;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Carregamos os dados para popular a dashboard
+        _artistas = await ArtistaApi.GetArtistasAsync();
+        _musicas = await MusicaApi.GetMusicasAsync();
+
+        if (_artistas is not null)
+        {
+            // Pega 5 artistas aleatórios ou os top 5 para exibir no carrossel
+            _artistasDestaque = _artistas
+                .OrderByDescending(a => a.Classificacao)
+                .Take(5)
+                .ToList();
+        }
+    }
+
+    private string ObterImagem(ArtistaResponse artista)
+    {
+        return string.IsNullOrEmpty(artista.FotoPerfil) || !artista.FotoPerfil.Contains("Fotos") 
+            ? "images/cardArtista.png" 
+            : $"https://localhost:7089/{artista.FotoPerfil}";
+    }
+}
