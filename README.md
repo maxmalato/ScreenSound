@@ -13,17 +13,31 @@
 
 O ScreenSound oferece uma experiência visual rica e responsiva, permitindo gerenciar músicas e artistas de forma intuitiva.
 
+### ⚙️ API
+Visão geral dos endpoints da API do projeto.
+
+<img width="2880" height="7386" alt="api" src="https://github.com/user-attachments/assets/079ed711-ff2e-49e2-aa88-6fb3125a4ce0" />
+
+
 ### 🏠 Dashboard e Home
 Uma visão geral com carrossel de destaques e estatísticas do sistema.
-![Dashboard ScreenSound](assets/home.png)
 
-### 📱 Responsividade (Mobile)
-Layout adaptado para dispositivos móveis, com menu lateral e navegação otimizada.
-![Mobile Layout](assets/mobile.png)
+<img width="2880" height="2172" alt="login" src="https://github.com/user-attachments/assets/5447c67e-315a-43e5-96f1-a9f0a9d795f4" />
 
-### 🎨 Detalhes e Avaliação
-Página de detalhes do artista com sistema de avaliação por estrelas.
-![Detalhes Artista](assets/detalhes.png)
+
+### 🎵 Artistas, Gêneros e Músicas
+Exibição das páginas dos artistas, músicas e gêneros.
+
+<img width="2880" height="2582" alt="artists_view" src="https://github.com/user-attachments/assets/d8340a49-6544-4e7e-99a2-26e9662768cf" />
+
+--
+
+<img width="2880" height="1342" alt="musics_view" src="https://github.com/user-attachments/assets/8d434f74-92a3-4170-9684-e13c97edb68a" />
+
+--
+
+<img width="2880" height="1342" alt="genrer_view" src="https://github.com/user-attachments/assets/f0d07e9b-4cf9-4104-ba88-dc466df333e7" />
+
 
 ---
 
